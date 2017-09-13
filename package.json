@@ -1,0 +1,26 @@
+{
+  "name": "language-zvm-asm",
+  "main": "./lib/language-zvm-asm",
+  "version": "0.1.0",
+  "description": "Syntax highlighting for z/VM assembler language files",
+  "keywords": [
+    "language",
+    "grammar",
+    "z/VM",
+    "syntax"
+  ],
+  "activationCommands": {
+    "atom-workspace": "language-zvm-asm:toggle"
+  },
+  "activationHooks": [
+    "language-zvm-asm:grammar-used"
+  ],
+  "repository": "https://github.com/openmainframeproject/atompkg-language-zvm-asm",
+  "license": "Apache 2",
+  "comment": "See NOTICE.md for copyright notices",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+  }
+}

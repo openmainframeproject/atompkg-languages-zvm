@@ -1,0 +1,31 @@
+
+# Change summary
+# - Wrote syntax rules to parse development tool add-ons
+
+# After editing this file, CTL-SHIFT-F5 or C-S-P window:reload to update the active editor with the revised grammar.
+# editor:log-cursor-scope to see which selectors (example: comment.block.rexx) the grammar applies at the cursor's location.
+
+# Separates development tool parameters from the official language definition
+
+'scopeName': 'source.zvmplxedl'
+'name': 'z/VM PLX EDL'
+'fileTypes': ['PLXCOPY']
+
+'patterns': [
+    { # Point to the base Rexx syntax rules
+      'include': 'source.zvmplx'
+    },
+    { # - SID codes (used during the z/VM development process)
+      'match': '@[A-Z0-9]{7}'
+      'name': 'comment.line.sid.zvmplxedl'
+    },
+]
+
+'repository': {
+}
+
+# References
+# - https://www.sitepoint.com/how-to-write-a-syntax-highlighting-package-for-atom/
+# - https://manual.macromates.com/en/language_grammars
+# - http://www.regular-expressions.info/characters.html
+# - http://www.apeth.com/nonblog/stories/textmatebundle.html

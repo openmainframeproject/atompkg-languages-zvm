@@ -1,0 +1,182 @@
+
+# Change summary
+# - Wrote syntax rules based on Walter Church's internal set, then re-wrote
+#   some of them based on PLAS 1.4.2 Language Reference
+# - This grammar assumes standard compiler margins of 2,72.  It's fairly common for bilingual macros to depend on them.
+#   Otherwise, its strategy is very different than the assembler grammar, because assembler is more line-oriented.
+# - Grammar for generated assembler assumes genmargins 1,72.  It's fairly common for bilingual macros to depend on them.
+#   - 1: blank, except in generated assembler code
+#   - 2-72: statements
+#   - 73-80: identification sequence numbers (optional)
+
+# After editing this file, CTL-SHIFT-F5 or C-S-P window:reload to update the active editor with the revised grammar.
+# editor:log-cursor-scope to see which selectors (example: comment.block.zvmasm) the grammar applies at the cursor's location.
+# Behavioral notes
+# - If a line matches line-too-long, it does NOT match others like uncontinued-statement (provable using editor:log-cursor-scope)
+
+'scopeName': 'source.zvmplx'
+'name': 'z/VM PL/X'
+'fileTypes': ['PLX']
+
+'patterns': [
+    { 'include': '#line-too-long-rule' },
+    { 'include': '#sequence-number-rule' },
+    { 'include': '#block-comment-rule' },
+    { 'include': '#line-comment-rule' },
+    { 'include': '#block-generate-rule' },
+    { 'include': '#single-quoted-string-rule' },
+    { 'include': '#double-quoted-string-rule' },
+    { 'include': '#macro-include-rule' },
+    { 'include': '#macro-general-rule' },
+
+    {
+      'match': '\\b(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))\\b'
+      'name': 'constant.numeric.zvmplx'
+    }
+    { # TODO Too many captures values for regex
+      'match': '([@][(?i)ASSERT|CREATE|DISABLE|ENABLE|ENDCREATE|ENDLOGIC|ENDSEGMENT|FORMAT|INCLUDE|LOGIC|PROCESS|PUSH|POP|SEGMENT|SPACE|PROCESS|ENDGEN|EJECT|LIST])(\\s*)(\\w*)'
+      'captures':
+        '0':
+            'name': 'constant.language.zvmplx' #'entity.name.function.zvmplx'
+        '1':
+            'name': 'keyword.control.zvmplx' #@E
+        '2':
+            'name': 'entity.name.function.zvmplx'
+        '3':
+            'name': 'keyword.control.zvmplx'  #JECT
+        '4':
+            'name': 'constant.language.zvmplx' #'entity.name.function.zvmplx'
+        '5':
+            'name': 'constant.language.zvmplx' #'entity.name.function.zvmplx'
+      'name':  'constant.language.zvmplx' #'entity.name.function.zvmplx'
+    }
+    { # TODO Could be tighter
+      'match': '\\b([R|r][0-9][0-5]?)\\b'
+      'name':  'keyword.operator.zvmplx'
+    }
+    { # TODO Why only CP macros special cased, vs any macro?
+      'match': '\\b([?]?HCP[A-Za-z]*)?\\s*\\(?(HCP[A-Za-z]*)\\)?\\b'
+      'captures':
+          '0':
+              'name': 'entity.name.tag.zvmplx'
+          '1':
+              'name': 'keyword.control.zvmplx'
+          '2':
+              'name': 'keyword.control.zvmplx'
+          '3':
+              'name': 'keyword.control.zvmplx'
+
+      'name': 'meta.function.zvmplx'
+    }
+    { # TODO isn't captures-0 an alias for name?  is variable. a valid root?
+      'match': '^[^\\*\\s]*\\b'
+      'captures':
+          '0':
+              'name': 'variable.zvmplx'
+      'name': 'meta.function.zvmplx'
+    }
+    {
+      'match': '\\b((?i)ASM|break|case|continue|default|DO|SELECT|to|UNTIL|ELSE|END|for|fortran|goto|IF|THEN|WHEN|OTHERWISE|REPEAT|return|sizeof|struct|switch|typedef|union|WHILE|DECLARE|DCL|INCLUDE|RFY|RESPECIFY|UNRESTRICTED|UNRSTD|RESTRICTED|RSTD|REFS|NOREFS|SETS|NOSETS|L|RETCODE|GENERATE|GEN|DEFS|NODEFS|AMODE|ENVIRONMENT|EXIT|NOEXIT|FLOWS|NOFLOWS|OPTACROSS|SEQFLOW|NOSEQFLOW|WITHBASEREG)\\b(\\s*)'
+      'name': 'keyword.control.zvmplx'
+    }
+    {
+      'match': '\\%|(\\?\\w*)'
+      'name': 'entity.name.function.zvmplx'
+    }
+    {
+      'match': '\\b((?i)_Bool|_Complex|_Imaginary|bool|char|double|float|int|long|short|signed|size_t|unsigned_of|signed_of|void|FIXED|BIT|CHAR|CONSTANT|POINTER|PTR|SYSLIB|DEFINED|CHARACTER|DESTROY|NONLOCAL|EXTERNAL|SYSUT5|ABS|ALET|ARGADDR|ARGCOUNT|AUTOSIZE|BIT_OF|BITPOS|CacheLnExcl|CLExcl|ARGADDR|CHAR_OF|CONDCODEMASK|CCMASK|DIM|EVAL|FIXED_OF|HBOUND|HVAL_OF|IGNREADONLY|IGNRO|INDEX|LBOUND|LVAL_OF|LVAL|ARGADDR|OFFSET|OMITTED|POINTER_OF|PTR_OF|PTROFF|SIZE|SPACEID|STORAGE|SUBSTRLEN|SYSDATE|SYSDATEC|SYSPARM|SYSTIME|TRANSLATE|TRANS|VERIFY|VET|VIAADDR|VIAPOINTER|VIAPTR|NULL|MAX|MIN|TRUE|FALSE|ON|OFF|YES|NO|__LINE__|__DATA__|__FILE__|__func__|__TIME__|__STDC__|LOCK|ACTION|HOLD|CODE|BDY|BOUNDARY)\\b(\\s*)'
+      'name': 'storage.type.zvmplx'
+    }
+    {
+      'match': '((?i)auto|const|extern|inline|register|restrict|static|volatile|NOSEGMENT|BASED|LENGTH|Addroff|ADDR)\\('
+      'captures':
+          '0':
+              'name': 'entity.name.tag.zvmplx'
+          '1':
+              'name': 'keyword.control.zvmplx'
+      'name': 'keyword.control.zvmplx'
+    }
+]
+
+'repository': {
+    'line-too-long-rule': {
+      # Anything over 80 characters makes line come up red
+      # TODO really want this test to be >72 plus anything BUT a sequence number or blanks
+      # TODO see if line-too-long-rule can be included from asm grammar
+      'match': '.*(?<=.{80}).+'
+      'name': 'invalid.illegal.zvmplx'
+    },
+    'sequence-number-rule': {
+      # TODO see if line-too-long-rule can be included from asm grammar
+      # TODO this should only worry about rightmost 8 columns
+      'match': '[0-9]{8}\\n'
+      'name': 'comment.line.zvmplx'
+    },
+    'block-generate-rule': {
+      # TODO support parameters
+      'begin': '((?i)generate)\\s*[;]\\s*([/][*].*)?'
+      'beginCaptures':
+          '1':
+              'name': 'keyword.control.zvmplx'
+          '2':
+              'name': 'comment.line.zvmplx'
+      'end': '((?i)@endgen)\\s*[;]\\s*([*][/])?.*'
+      'endCaptures':
+          '1':
+              'name': 'keyword.control.zvmplx'
+          '2':
+              'name': 'comment.line.zvmplx'
+      'patterns': [
+        { 'include': 'source.zvmasm' }  # SIC: zvmasm here
+      ]
+    },
+    'block-comment-rule': {
+      'begin': '[/][*]'
+      'end': '[*][/]'
+      'name': 'comment.block.zvmplx'
+    },
+    'line-comment-rule': {
+      # TODO see which works better \Z metacharacter or \\n
+      'begin': '!'
+      'end': '\\n'
+      'name': 'comment.line.zvmplx'
+    },
+    'single-quoted-string-rule': {
+      # TODO This seems to say that a string could be delimited by \n, doubt it.
+      # TODO Strings can have a trailing x/etc.
+      'begin': '\''
+      'end': '\'|\\n'
+      'name': 'string.quoted.single.zvmplx'
+    },
+    'double-quoted-string-rule': {
+      # TODO Strings can have a trailing x/etc.
+      'begin': '"'
+      'end': '"'
+      'name': 'string.quoted.double.zvmplx'
+    },
+    'macro-include-rule': {
+      'match': '\\s*((?i)[%]include)\\s+(\\w+)\\s*[(]\\s*(\\w+)\\s*[)]\\s*[;]'
+      'captures':
+          '1':
+              'name': 'support.function.zvmplx'
+          '2':
+              'name': 'support.type.zvmplx'
+          '3':
+              'name': 'constant.character.zvmplx'
+    },
+    'macro-general-rule': {
+      # used \\b not \\s+ because the former matches samples like: %foo=bar
+      'match': '\\s*((?i)[%?]\\w+)\\b.*[;]'
+      'captures':
+          '1':
+              'name': 'support.function.zvmplx'
+    },
+    'empty-rule': {
+    },
+}
+
+# References
+# - https://www.sitepoint.com/how-to-write-a-syntax-highlighting-package-for-atom/
+# - https://manual.macromates.com/en/language_grammars
+# - http://www.regular-expressions.info/characters.html
+# - http://www.apeth.com/nonblog/stories/textmatebundle.html

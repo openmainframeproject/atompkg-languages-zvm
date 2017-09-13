@@ -1,0 +1,115 @@
+'.source.zvmplx':
+  # For syntax, see
+  # - readme at https://github.com/atom/snippets
+  # http://flight-manual.atom.io/using-atom/sections/snippets/
+  # Not sure yet what $0 does, HTML examples use it but JS examples do not
+
+  # /* Comment
+  # The comment snippet actually works (tested in 1.19), but it's not
+  # obvious because there is no prompt.  Yet if you type /*[tab key] it
+  # expands properly.  See the following issues:
+  # https://github.com/atom/autocomplete-snippets/issues/56
+  # https://github.com/atom/autocomplete-snippets/issues/67
+  'Comment':
+    'prefix': '/*'
+    'body': '/* $1 */$0'
+  # C
+  'Char 4 fragment': # fragment => no puncuation
+    'prefix': 'c4'
+    'body': 'Char(4)$1 /* $2 */$0'
+  'Dcl Char 4':
+    'prefix': 'c4dcl'
+    'body': 'Dcl ${1:Name} Char(4); /* $2 */$0'
+  'Char 8 fragment': # fragment => no puncuation
+    'prefix': 'c8'
+    'body': 'Char(8)$1 /* $2 */$0'
+  'Dcl Char 8':
+    'prefix': 'c8dcl'
+    'body': 'Dcl ${1:Name} Char(8); /* $2 */$0'
+  'Char * fragment': # fragment => no puncuation
+    'prefix': 'c*'
+    'body': 'Char(*)$1 /* $2 */$0'
+  'Dcl Char *':
+    'prefix': 'c*dcl'
+    'body': 'Dcl ${1:Name} Char(*); /* $2 */$0'
+  # E
+  'Else do/end':
+    'prefix': 'else'
+    'body': """
+      Else Do;
+      \t$1
+      End;
+    """
+  # F
+  'Fixed 31 fragment': # fragment => no puncuation
+    'prefix': 'f31'
+    'body': 'Fixed(31)$1 /* $2 */$0'
+  'Dcl Fixed 31':
+    'prefix': 'f31dcl'
+    'body': 'Dcl ${1:Name} Fixed(31); /* $2 */$0'
+  'Fixed 32 fragment': # fragment => no puncuation
+    'prefix': 'f32'
+    'body': 'Fixed(32)$1 /* $2 */$0'
+  'Dcl Fixed 32':
+    'prefix': 'f32dcl'
+    'body': 'Dcl ${1:Name} Fixed(32); /* $2 */$0'
+  # G
+  'Generate Code':
+    'prefix': 'gencode'
+    'body': """
+      Generate Refs(${1:names}) Sets(${2:names});
+      $3
+      @ENDGEN;
+    """
+  'Generate Code (Alias)':
+    'prefix': 'asm'
+    'body': """
+      Generate Refs(${1:names}) Sets(${2:names});
+      $3
+      @ENDGEN;
+    """
+  'Generate Data':
+    'prefix': 'gendata'
+    'body': """
+      Generate Data Defs(${1:names});
+      $2
+      @ENDGEN;
+    """
+  # I
+  'If do/end':
+    'prefix': 'if'
+    'body': """
+      If ${1:condition} Do;
+      \t$2
+      End;
+    """
+  # P
+  'Pointer 31 fragment': # fragment => no puncuation
+    'prefix': 'p31'
+    'body': 'Pointer(31)$1 /* $2 */$0'
+  'Dcl Pointer 31':
+    'prefix': 'p31dcl'
+    'body': 'Dcl ${1:Name} Pointer(31); /* $2 */$0'
+  # R
+  'Rfy Register':
+    'prefix': 'rfyr'
+    'body': """
+      Rfy (${1:Register(s)}) Rstd;
+      $2;
+      Rfy (${1:Register(s)}) UnRstd;
+    """
+  'Rfy Based variable':
+    'prefix': 'rfyb'
+    'body': """
+      Rfy ${1:BasedVariable} Based(${2:*}) Push;
+      $3;
+      Rfy ${1:BasedVariable} Pop;
+    """
+  # S
+  '%Include Syslib':
+    'prefix': 'syslib'
+    'body': '%Include Syslib(${1:Name}); /* $2 */$0'
+  # T
+  '/* TODO: ... */':
+    'prefix': 'todo'
+    'body': '/* TODO: ${1:text} */$0'

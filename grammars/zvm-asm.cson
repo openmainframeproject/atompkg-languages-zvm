@@ -1,0 +1,151 @@
+
+# Change summary
+# - Wrote syntax rules based on Walter Church's internal set, then re-wrote
+#   some of them based on: https://www-01.ibm.com/software/awdtools/hlasm/library.html
+#   (site last updated July 2015) High Level Assembler for z/OS & z/VM & z/VSE
+#   Language Reference Version 1 Release 6 SC26-4940-07
+# - This grammar assumes the standard field boundaries in statements:
+#   - begin column        = 1
+#   - continue column     = 16
+#   - end column          = 71
+#   - continuation column = 72
+#   - identification sequence field = 73-80
+
+# After editing this file, CTL-SHIFT-F5 or C-S-P window:reload to update the active editor with the revised grammar.
+# editor:log-cursor-scope to see which selectors (example: comment.block.zvmasm) the grammar applies at the cursor's location.
+# Behavioral notes
+# - If a line matches line-too-long, it does NOT match others like uncontinued-statement (provable using editor:log-cursor-scope)
+
+# TODO: highlight commas, end parens, etc.
+# TODO: support variables in symbols
+# TODO: ?support macro statements
+
+'scopeName': 'source.zvmasm'
+'name': 'z/VM assembler'
+'fileTypes': ['ASM', 'asm','assemble','macro','repos']
+
+'patterns': [
+    { 'include': '#line-too-long-rule' },
+    { 'include': '#continuation-line-rule' },
+    { 'include': '#continuation-remarks-rule' },
+    { 'include': '#uncontinued-comment-rule' },
+    { 'include': '#uncontinued-statement-rule' },
+    { 'include': '#sequence-number-rule' },
+    { 'include': '#register-variable-rule' },
+    { 'include': '#register-equate-rule' },
+    { 'include': '#single-quoted-string-rule' },
+    { 'include': '#declare-rule' },
+]
+
+'repository': {
+    'line-too-long-rule': {
+      # Anything over 80 characters makes line come up red
+      # TODO really want this test to be >72 plus anything BUT a sequence number or blanks
+      'match': '.*(?<=.{80}).+'
+      'name': 'invalid.illegal.zvmasm'
+    },
+    'sequence-number-rule': {
+      # TODO this should only worry about rightmost 8 columns
+      'match': '[0-9]{8}\\n'
+      'name': 'comment.line.zvmasm'
+    },
+    'register-variable-rule': {
+      # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
+      'match': '([R|r][0-9][0-5]?)\\b'
+      'name':  'keyword.operator.zvmasm'
+    },
+    'register-equate-rule': {
+      # * >> + on whitespace after EQU
+      # case-insensitive the EQU which pushed other indices up 1
+      # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
+      # TODO verify capturing; original had 7 indices but only 6 groups
+      'match': '((?i)EQU)[\\s]+([^\\s\']*)(\'.*\'|)([^\\s]*)([^\\s]*)([^@\\n]*)([^@0-9]{2})'
+      'captures':
+          '1':
+              'name': 'storage.type.zasm'
+          '2':
+              'name': 'storage.type.zasm'
+          '3':
+              'name': 'string.quoted.single.zasm'
+          '4':
+              'name': 'comment.line.zasm'
+          '5':
+              'name': 'comment.line.zasm'
+          '6':
+              'name': 'comment.line.zasm'
+          '7':
+              'name': 'comment.line.zasm'
+          '8':
+              'name': 'entity.name.tag.zasm'
+      'name': 'keyword.operator.zasm'
+    },
+    'single-quoted-string-rule': {
+      'match': '(\'.*\')'
+      'name': 'string.quoted.single.zvmasm'
+    },
+    'uncontinued-comment-rule': {
+      # Handles normal comments and macro comments, which are permitted in open code
+      'match': '^[.]?[*].*'
+      'name': 'comment.line.zvmasm'
+    },
+    'continuation-remarks-rule': {
+      # Essentially no wiggle room in the manual here: >15 spaces to start means it's remarks.
+      # It's technically permitted that the operation field could begin 16 on a non-continuation line, so this CAN match spuriously
+      # TODO See if lookbehind can be used confirm this is a continuation line.  I'm skeptical.
+      'match': '^[ ]{16,}.*'
+      'name': 'comment.line.zvmasm'
+    },
+    'continuation-line-rule': {
+      # TODO See if lookahead could be used to distinguish comments from operands
+      'match': '^[ ]{15}([A-Za-z0-9@$#_+-,=.*()\'/&]+)([ ]+.*)?'
+      'captures':
+          #'1': # Continued operands, leave as normal source by default
+          '2': # remarks
+              'name': 'comment.line.zvmasm'
+    },
+    'uncontinued-statement-rule': {
+      # TODO Handle corner cases where space does not signal end of operands
+      # Structure: line-begin, optional label, required space(s), required operation, optional portion
+      #            optional portion: required space(s), operands (optional to keep portion optional), space, remarks
+      'match': '^([A-Za-z][A-Za-z0-9@$#_]*)?([ ]+)([A-Za-z][A-Za-z0-9]*)([ ]+[^ ]+)?(.*)'
+      'captures':
+          '1':
+              'name': 'entity.name.tag.zasm'
+          # 2 = required spaces; assign something like invalid.illegal to see them for debugging
+          '3':
+              'name': 'keyword.control.zvmasm'
+          #'4': # operands, leave as normal source by default
+          '5': # remarks
+              'name': 'comment.line.zvmasm'
+    },
+    'declare-rule': {
+      # vs original, made DC/DS case-insensitive which pushed capture group numbers up 1
+      # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
+      'match': '\\b((?i)D[C|S])[\\s]*([0-9]*|\\(.*\\))([A-Z][DUBH]?)(L?[0-9]*)(\'.*\'|\\s)([^\\s]*)([^@\\n]*)([^@0-9]{2})'
+      'captures':
+          '1':
+              'name': 'storage.type.zvmasm'
+          '2':
+              'name': 'storage.type.zvmasm'
+          '3':
+              'name': 'storage.type.zvmasm'
+          '4':
+              'name': 'comment.line.zvmasm'
+          '5':
+              'name': 'string.quoted.single.zvmasm'
+          '6':
+              'name': 'comment.line.zvmasm'
+          '7':
+              'name': 'comment.line.zvmasm'
+          '8':
+              'name': 'entity.name.tag.zvmasm'
+
+      'name': 'keyword.operator.zvmasm'
+    },
+
+}
+
+
+#https://www.sitepoint.com/how-to-write-a-syntax-highlighting-package-for-atom/
+#https://manual.macromates.com/en/language_grammars
+#http://www.regular-expressions.info/characters.html
