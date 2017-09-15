@@ -16,7 +16,6 @@
 # Behavioral notes
 # - If a line matches line-too-long, it does NOT match others like uncontinued-statement (provable using editor:log-cursor-scope)
 
-# TODO Add @[end]logic => block comment, non(?)-recursive
 # TODO No-auto-indent works better with PLX (seems likely), if so doc in readme
 
 'scopeName': 'source.zvmplx'
@@ -26,6 +25,7 @@
 'patterns': [
     { 'include': '#line-too-long-rule' },
     { 'include': '#sequence-number-rule' },
+    { 'include': '#block-logic-rule' },
     { 'include': '#block-comment-rule' },
     { 'include': '#line-comment-rule' },
     { 'include': '#block-generate-rule' },
@@ -138,6 +138,17 @@
     'block-comment-rule': {
       'begin': '[/][*]'
       'end': '[*][/]'
+      'name': 'comment.block.zvmplx'
+    },
+    'block-logic-rule': {
+      'begin': '^\\s*((?i)[@]\\s*LOGIC)\\s*[;]'
+      'beginCaptures':
+          '1':
+              'name': 'meta.keyword.zvmplx'
+      'end'  : '^\\s*((?i)[@]\\s*ENDLOGIC)\\s*[;]'
+      'endCaptures':
+          '1':
+              'name': 'meta.keyword.zvmplx'
       'name': 'comment.block.zvmplx'
     },
     'line-comment-rule': {
