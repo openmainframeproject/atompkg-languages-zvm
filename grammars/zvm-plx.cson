@@ -2,6 +2,8 @@
 # Change summary
 # - Wrote syntax rules based on Walter Church's internal set, then re-wrote
 #   some of them based on PLAS 1.4.2 Language Reference
+# - Added COPY file type for macros
+
 # - This grammar assumes standard compiler margins of 2,72.  It's fairly common for bilingual macros to depend on them.
 #   Otherwise, its strategy is very different than the assembler grammar, because assembler is more line-oriented.
 # - Grammar for generated assembler assumes genmargins 1,72.  It's fairly common for bilingual macros to depend on them.
@@ -14,9 +16,12 @@
 # Behavioral notes
 # - If a line matches line-too-long, it does NOT match others like uncontinued-statement (provable using editor:log-cursor-scope)
 
+# TODO Add @[end]logic => block comment, non(?)-recursive
+# TODO No-auto-indent works better with PLX (seems likely), if so doc in readme
+
 'scopeName': 'source.zvmplx'
 'name': 'z/VM PL/X'
-'fileTypes': ['PLX']
+'fileTypes': ['PLX','COPY']
 
 'patterns': [
     { 'include': '#line-too-long-rule' },
