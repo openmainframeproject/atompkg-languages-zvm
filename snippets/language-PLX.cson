@@ -4,6 +4,7 @@
   # http://flight-manual.atom.io/using-atom/sections/snippets/
   # Not sure yet what $0 does, HTML examples use it but JS examples do not
 
+  # ////////////////////////////////////////////////////////////////////
   # /* Comment
   # The comment snippet actually works (tested in 1.19), but it's not
   # obvious because there is no prompt.  Yet if you type /*[tab key] it
@@ -13,7 +14,24 @@
   'Comment':
     'prefix': '/*'
     'body': '/* $1 */$0'
-  # C
+  # AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+  'Generate macro code':
+    'prefix': 'answer code'
+    'body': '''
+      Ans("${1:Generated code}
+          " || Comment(" ${2:Comment}
+          ")) Skip;
+      $0
+    '''
+  'Generate macro error message':
+    'prefix': 'answer error message'
+    'body': '''
+      Answer Skip MsgLevel(8)
+        Message("${1:error text}
+        ");
+      $0
+    '''
+  # CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
   'Char 4 fragment': # fragment => no puncuation
     'prefix': 'c4'
     'body': 'Char(4)$1 /* $2 */$0'
@@ -32,7 +50,7 @@
   'Dcl Char *':
     'prefix': 'c*dcl'
     'body': 'Dcl ${1:Name} Char(*); /* $2 */$0'
-  # E
+  # EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
   'Else do/end':
     'prefix': 'else'
     'body': """
@@ -40,7 +58,7 @@
       \t$1
       End;
     """
-  # F
+  # FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
   'Fixed 31 fragment': # fragment => no puncuation
     'prefix': 'f31'
     'body': 'Fixed(31)$1 /* $2 */$0'
@@ -53,7 +71,7 @@
   'Dcl Fixed 32':
     'prefix': 'f32dcl'
     'body': 'Dcl ${1:Name} Fixed(32); /* $2 */$0'
-  # G
+  # GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
   'Generate Code':
     'prefix': 'gencode'
     'body': """
@@ -75,7 +93,7 @@
       $2
       @ENDGEN;
     """
-  # I
+  # IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
   'If do/end':
     'prefix': 'if'
     'body': """
@@ -83,14 +101,62 @@
       \t$2
       End;
     """
-  # P
+  '%Include Syslib':
+    'prefix': 'include'
+    'body': '%Include Syslib(${1:Name}); /* $2 */$0'
+  # LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+  'Insert @List push/off asm/pop block':
+    'prefix': 'listoffasm'
+    'body': """
+      @LIST PUSH;
+      @LIST OFF ASM;
+      $1
+      @LIST POP;
+    """
+  # The @logic snippet MIGHT actually work, but it's not
+  # obvious because there is no prompt.
+  # Yet if you type @logic[tab key] it MAY expand properly.
+  # In a buffer *with existing @LOGIC; statements*, it does not work (1.21.1).
+  # See the following issues:
+  # https://github.com/atom/autocomplete-snippets/issues/56
+  # https://github.com/atom/autocomplete-snippets/issues/67
+  'Insert @Logic block':
+    'prefix': '@logic'
+    'body': """
+      @LOGIC;
+      $1
+      @ENDLOGIC;
+    """
+  'Insert @Logic block':
+    'prefix': 'logic' # Intentionally omitted @ from first body line
+    'body': """
+      LOGIC;
+      $1
+      @ENDLOGIC;
+    """
+  # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+  'Otherwise clause':
+    'prefix': 'otherwise'
+    'body': """
+    Otherwise Do;
+        \t$1
+      End; /* Otherwise */
+    """
+  # PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
   'Pointer 31 fragment': # fragment => no puncuation
     'prefix': 'p31'
     'body': 'Pointer(31)$1 /* $2 */$0'
   'Dcl Pointer 31':
     'prefix': 'p31dcl'
     'body': 'Dcl ${1:Name} Pointer(31); /* $2 */$0'
-  # R
+  'Procedure statement':
+    'prefix': 'procedure'
+    'body': """
+    ${1:Name} : Procedure();
+        \t$0
+    End; /* ${1:Name} */
+    """
+  # RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
   'Rfy Register':
     'prefix': 'rfyr'
     'body': """
@@ -105,11 +171,31 @@
       $3;
       Rfy ${1:BasedVariable} Pop;
     """
-  # S
-  '%Include Syslib':
+  # SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+  'Select - general form':
+    'prefix': 'select'
+    'body': """
+    Select;
+    When( ${1:condition} )Do;
+        \t$2
+      End; /* when */
+    Otherwise Do;
+        \t
+      End; /* Otherwise */
+    End; /* select */
+    """
+  '%Include Syslib (alias)':
     'prefix': 'syslib'
     'body': '%Include Syslib(${1:Name}); /* $2 */$0'
-  # T
+  # TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   '/* TODO: ... */':
     'prefix': 'todo'
     'body': '/* TODO: ${1:text} */$0'
+  # WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWw
+  'When clause':
+    'prefix': 'when'
+    'body': """
+    When( ${1:condition} )Do;
+        \t$2
+      End; /* when */
+    """

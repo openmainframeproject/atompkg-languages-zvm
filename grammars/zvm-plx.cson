@@ -4,9 +4,9 @@
 #   some of them based on PLAS 1.4.2 Language Reference
 # - Added COPY file type for macros
 
-# - This grammar assumes standard compiler margins of 2,72.  It's fairly common for bilingual macros to depend on them.
+# - This grammar assumes standard compiler margins of 2,72.  It's fairly common for bilingual macros to depend on those margin values.
 #   Otherwise, its strategy is very different than the assembler grammar, because assembler is more line-oriented.
-# - Grammar for generated assembler assumes genmargins 1,72.  It's fairly common for bilingual macros to depend on them.
+# - Grammar for generated assembler assumes genmargins 1,72.  It's fairly common for bilingual macros to depend on those genmargin values.
 #   - 1: blank, except in generated assembler code
 #   - 2-72: statements
 #   - 73-80: identification sequence numbers (optional)
@@ -33,13 +33,24 @@
     { 'include': '#double-quoted-string-rule' },
     { 'include': '#macro-include-rule' },
     { 'include': '#macro-general-rule' },
+    { 'include': '#label-general-rule' },
+    { 'include': '#eject-control-rule' },
+    { 'include': '#list-control1-rule' },
+    { 'include': '#list-control2-rule' },
+    { 'include': '#list-control3-rule' },
+    { 'include': '#list-control4-rule' },
+    { 'include': '#begin-statement-rule' },
 
+      # TODO Handle "extended decimal constants"
+      # TODO Handle "hexadecimal arithmetic constants"
+      # TODO Handle "binary constants"
+      # TODO Probably want to use lookahead for many //b delimiters, e.g. after X etc on a "bit constant" in the quoted string rules
     {
       'match': '\\b(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))\\b'
       'name': 'constant.numeric.zvmplx'
     }
     { # TODO Too many captures values for regex
-      'match': '([@][(?i)ASSERT|CREATE|DISABLE|ENABLE|ENDCREATE|ENDLOGIC|ENDSEGMENT|FORMAT|INCLUDE|LOGIC|PROCESS|PUSH|POP|SEGMENT|SPACE|PROCESS|ENDGEN|EJECT|LIST])(\\s*)(\\w*)'
+      'match': '([@][(?i)ASSERT|CREATE|DISABLE|ENABLE|ENDCREATE|ENDLOGIC|ENDSEGMENT|FORMAT|INCLUDE|LOGIC|PROCESS|PUSH|POP|SEGMENT|SPACE|PROCESS|ENDGEN|LIST])(\\s*)(\\w*)'
       'captures':
         '0':
             'name': 'constant.language.zvmplx' #'entity.name.function.zvmplx'
@@ -92,23 +103,24 @@
       'match': '\\b((?i)_Bool|_Complex|_Imaginary|bool|char|double|float|int|long|short|signed|size_t|unsigned_of|signed_of|void|FIXED|BIT|CHAR|CONSTANT|POINTER|PTR|SYSLIB|DEFINED|CHARACTER|DESTROY|NONLOCAL|EXTERNAL|SYSUT5|ABS|ALET|ARGADDR|ARGCOUNT|AUTOSIZE|BIT_OF|BITPOS|CacheLnExcl|CLExcl|ARGADDR|CHAR_OF|CONDCODEMASK|CCMASK|DIM|EVAL|FIXED_OF|HBOUND|HVAL_OF|IGNREADONLY|IGNRO|INDEX|LBOUND|LVAL_OF|LVAL|ARGADDR|OFFSET|OMITTED|POINTER_OF|PTR_OF|PTROFF|SIZE|SPACEID|STORAGE|SUBSTRLEN|SYSDATE|SYSDATEC|SYSPARM|SYSTIME|TRANSLATE|TRANS|VERIFY|VET|VIAADDR|VIAPOINTER|VIAPTR|NULL|MAX|MIN|TRUE|FALSE|ON|OFF|YES|NO|__LINE__|__DATA__|__FILE__|__func__|__TIME__|__STDC__|LOCK|ACTION|HOLD|CODE|BDY|BOUNDARY)\\b(\\s*)'
       'name': 'storage.type.zvmplx'
     }
-    {
-      'match': '((?i)auto|const|extern|inline|register|restrict|static|volatile|NOSEGMENT|BASED|LENGTH|Addroff|ADDR)\\('
-      'captures':
-          '0':
-              'name': 'entity.name.tag.zvmplx'
-          '1':
-              'name': 'keyword.control.zvmplx'
+    { # - Tried using a non-capturing group (?:...) for the open-paren [(] so the paren is
+      #   not highlighted as if it was part of the keyword.  No help.
+      # - Positive lookahead (?=...) works as desired though to require an open paren
+      #   be present, without making it part of the matched/highlighted text.
+      # - Use negative lookbehind (?<=[\\w_]) to avoid highlighting array/function names that
+      #   end with one of the matched values, like minlength(i).
+      'match': '(?<![\\w_])((?i)auto|const|extern|inline|register|restrict|static|volatile|NOSEGMENT|BASED|LENGTH|Addroff|ADDR|ScopeInitial)(?=\\s*[(])'
       'name': 'keyword.control.zvmplx'
     }
 ]
 
 'repository': {
     'line-too-long-rule': {
-      # Anything over 80 characters makes line come up red
-      # TODO really want this test to be >72 plus anything BUT a sequence number or blanks
+      # Anything over 80 characters makes line came up red with 'match': '.*(?<=.{80}).+'
+      # (?<=...) = negative lookbehind
+      # This tests for 72 chars plus anything BUT a sequence number or whitespace
       # TODO see if line-too-long-rule can be included from asm grammar
-      'match': '.*(?<=.{80}).+'
+      'match': '.*(?<=.{72})(([^0-9 \\r\\n]+)|([0-9 \\r\\n]{8}.+))'
       'name': 'invalid.illegal.zvmplx'
     },
     'sequence-number-rule': {
@@ -141,14 +153,18 @@
       'name': 'comment.block.zvmplx'
     },
     'block-logic-rule': {
-      'begin': '^\\s*((?i)[@]\\s*LOGIC)\\s*[;]'
+      'begin': '^\\s*((?i)[@]\\s*LOGIC)\\s*([;])'
       'beginCaptures':
           '1':
               'name': 'meta.keyword.zvmplx'
-      'end'  : '^\\s*((?i)[@]\\s*ENDLOGIC)\\s*[;]'
+          '2':
+              'name': 'source.zvmplx'
+      'end'  : '^\\s*((?i)[@]\\s*ENDLOGIC)\\s*([;])'
       'endCaptures':
           '1':
               'name': 'meta.keyword.zvmplx'
+          '2':
+              'name': 'source.zvmplx'
       'name': 'comment.block.zvmplx'
     },
     'line-comment-rule': {
@@ -158,16 +174,22 @@
       'name': 'comment.line.zvmplx'
     },
     'single-quoted-string-rule': {
-      # TODO This seems to say that a string could be delimited by \n, doubt it.
-      # TODO Strings can have a trailing x/etc.
+      # See notes on double-quoted-string-rule, same rules
       'begin': '\''
-      'end': '\'|\\n'
+      'end': '\''
       'name': 'string.quoted.single.zvmplx'
     },
     'double-quoted-string-rule': {
-      # TODO Strings can have a trailing x/etc.
-      'begin': '"'
-      'end': '"'
+      # Character strings can have an optional trailing: C, S, Z, N
+      # Bit       constants can have an optional trailing: H, B
+      # If the trailing character exists, it must be followed by a delimiter or line break.
+      # TODO Support optional trailing modifiers
+      # ((?i)X|B|C|S|Z|N)? following the delimiter works *when the character is present* but fails if the character is a ; or ) or [and so on]
+      # - Tried using negative lookahead (?!...) for the "followed by" character so it's not highlighted as part of the string.  (?![A-Za-z0-9_]?) on " followed by | (with no intervening whitespace, as in "s1"||"s2") highlighted the first pipe, which is odd.
+      # - \\b fails, by definition.
+      # - \\W will NOT work reliably
+      'begin': '\"'
+      'end': '\"'
       'name': 'string.quoted.double.zvmplx'
     },
     'macro-include-rule': {
@@ -182,10 +204,47 @@
     },
     'macro-general-rule': {
       # used \\b not \\s+ because the former matches samples like: %foo=bar
-      'match': '\\s*((?i)[%?]\\w+)\\b.*[;]'
+      # remove trailing .*[;] so cases like %macrovar="string" allow string rule to match string
+      'match': '\\s*((?i)[%?]\\w+)\\b'
       'captures':
           '1':
               'name': 'support.function.zvmplx'
+    },
+    'label-general-rule': {
+      'match': '\\s*(\\w+)\\s*[:]'
+      'captures':
+          '1':
+              'name': 'entity.name.function.zvmplx'
+    },
+    'eject-control-rule': {
+      'match': '((?i)@EJECT\\s*([(].+[)])?\\s*(\\s+(MACRO|NOMACRO))?\\s*(\\s+(COMPILE|NOCOMPILE))?\\s*(\\s+(ASSEMBLE|NOASSEMBLE|ASM|NOASM))?\\s*;)'
+      'name': 'comment.line.zvmplx'
+    },
+    'space-control-rule': {
+      'match': '((?i)@SPACE\\s*([(]\\d+[)])?\\s*(\\s+(MACRO|NOMACRO))?\\s*(\\s+(COMPILE|NOCOMPILE))?\\s*(\\s+(ASSEMBLE|NOASSEMBLE|ASM|NOASM))?\\s*;)'
+      'name': 'comment.line.zvmplx'
+    },
+    'list-control1-rule': {
+      'match': '((?i)@LIST\\s*(\\s+(MACRO|NOMACRO))?\\s*(\\s+(COMPILE|NOCOMPILE))?\\s*(\\s+(ASSEMBLE|NOASSEMBLE|ASM|NOASM))?\\s*(\\s+NOECHO)?\\s*;)'
+      'name': 'comment.line.zvmplx'
+    },
+    'list-control2-rule': {
+      'match': '((?i)@LIST\\s*(\\s+ON|OFF)?\\s*(\\s+MACRO)?\\s*(\\s+COMPILE)?\\s*(\\s+(ASSEMBLE|ASM))?\\s*(\\s+NOECHO)?\\s*;)'
+      'name': 'comment.line.zvmplx'
+    },
+    'list-control3-rule': {
+      'match': '((?i)@LIST\\s*(\\s+(PUSH|POP))?\\s*(\\s+NOECHO)?\\s*;)'
+      'name': 'comment.line.zvmplx'
+    },
+    'list-control4-rule': {
+      'match': '((?i)@LIST\\s*(\\s+(ANNOTATE|NOANNOTATE))?\\s*(\\s+NOECHO)?\\s*;)'
+      'name': 'comment.line.zvmplx'
+    },
+    'begin-statement-rule': {
+      # - Use negative lookbehind (?<=[\\w_]) to avoid highlighting names that
+      #   end with one of the matched values, like mybegin;
+      'match': '(?<![\\w_])((?i)BEGIN\\s*(\\s+(ORDER|REORDER))?\\s*(\\s+(ENVIRONMENT|ENV)\\s*[(]\\s*(PRIMARY|AR)\\s*[)])?)\\s*;'
+      'name': 'keyword.control.zvmplx'
     },
     'empty-rule': {
     },
