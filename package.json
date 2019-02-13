@@ -1,7 +1,7 @@
 {
   "name": "language-zvm-asm",
   "main": "./lib/language-zvm-asm",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Syntax highlighting for z/VM assembler language files",
   "keywords": [
     "language",
