@@ -22,7 +22,7 @@
 
 'scopeName': 'source.zvmasm'
 'name': 'z/VM assembler'
-'fileTypes': ['ASM', 'asm','assemble','macro','repos']
+'fileTypes': ['ASM', 'asm','assemble','macro','repos','s']
 
 'patterns': [
     { 'include': '#line-too-long-rule' },
