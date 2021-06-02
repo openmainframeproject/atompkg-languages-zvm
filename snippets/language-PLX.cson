@@ -121,16 +121,9 @@
   # https://github.com/atom/autocomplete-snippets/issues/56
   # https://github.com/atom/autocomplete-snippets/issues/67
   'Insert @Logic block':
-    'prefix': '@logic'
+    'prefix': 'logic'
     'body': """
       @LOGIC;
-      $1
-      @ENDLOGIC;
-    """
-  'Insert @Logic block':
-    'prefix': 'logic' # Intentionally omitted @ from first body line
-    'body': """
-      LOGIC;
       $1
       @ENDLOGIC;
     """
