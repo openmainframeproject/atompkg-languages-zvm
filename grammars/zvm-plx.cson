@@ -70,20 +70,6 @@
       'match': '\\b([R|r][0-9][0-5]?)\\b'
       'name':  'keyword.operator.zvmplx'
     }
-    { # TODO Why only CP macros special cased, vs any macro?
-      'match': '\\b([?]?HCP[A-Za-z]*)?\\s*\\(?(HCP[A-Za-z]*)\\)?\\b'
-      'captures':
-          '0':
-              'name': 'entity.name.tag.zvmplx'
-          '1':
-              'name': 'keyword.control.zvmplx'
-          '2':
-              'name': 'keyword.control.zvmplx'
-          '3':
-              'name': 'keyword.control.zvmplx'
-
-      'name': 'meta.function.zvmplx'
-    }
     { # TODO isn't captures-0 an alias for name?  is variable. a valid root?
       'match': '^[^\\*\\s]*\\b'
       'captures':
@@ -94,10 +80,6 @@
     {
       'match': '\\b((?i)ASM|break|case|continue|default|DO|SELECT|to|UNTIL|ELSE|END|for|fortran|goto|IF|THEN|WHEN|OTHERWISE|REPEAT|return|sizeof|struct|switch|typedef|union|WHILE|DECLARE|DCL|INCLUDE|RFY|RESPECIFY|UNRESTRICTED|UNRSTD|RESTRICTED|RSTD|REFS|NOREFS|SETS|NOSETS|L|RETCODE|GENERATE|GEN|DEFS|NODEFS|AMODE|ENVIRONMENT|EXIT|NOEXIT|FLOWS|NOFLOWS|OPTACROSS|SEQFLOW|NOSEQFLOW|WITHBASEREG)\\b(\\s*)'
       'name': 'keyword.control.zvmplx'
-    }
-    {
-      'match': '\\%|(\\?\\w*)'
-      'name': 'entity.name.function.zvmplx'
     }
     {
       'match': '\\b((?i)_Bool|_Complex|_Imaginary|bool|char|double|float|int|long|short|signed|size_t|unsigned_of|signed_of|void|FIXED|BIT|CHAR|CONSTANT|POINTER|PTR|SYSLIB|DEFINED|CHARACTER|DESTROY|NONLOCAL|EXTERNAL|SYSUT5|ABS|ALET|ARGADDR|ARGCOUNT|AUTOSIZE|BIT_OF|BITPOS|CacheLnExcl|CLExcl|ARGADDR|CHAR_OF|CONDCODEMASK|CCMASK|DIM|EVAL|FIXED_OF|HBOUND|HVAL_OF|IGNREADONLY|IGNRO|INDEX|LBOUND|LVAL_OF|LVAL|ARGADDR|OFFSET|OMITTED|POINTER_OF|PTR_OF|PTROFF|SIZE|SPACEID|STORAGE|SUBSTRLEN|SYSDATE|SYSDATEC|SYSPARM|SYSTIME|TRANSLATE|TRANS|VERIFY|VET|VIAADDR|VIAPOINTER|VIAPTR|NULL|MAX|MIN|TRUE|FALSE|ON|OFF|YES|NO|__LINE__|__DATA__|__FILE__|__func__|__TIME__|__STDC__|LOCK|ACTION|HOLD|CODE|BDY|BOUNDARY)\\b(\\s*)'
@@ -207,8 +189,10 @@
       # remove trailing .*[;] so cases like %macrovar="string" allow string rule to match string
       'match': '\\s*((?i)[%?]\\w+)\\b'
       'captures':
+          '0':
+              'name': 'entity.tag.zvmplx'
           '1':
-              'name': 'support.function.zvmplx'
+              'name': 'support.name.zvmplx'
     },
     'label-general-rule': {
       'match': '\\s*(\\w+)\\s*[:]'
