@@ -20,7 +20,7 @@
 
 'scopeName': 'source.zvmplx'
 'name': 'z/VM PL/X'
-'fileTypes': ['PLX','COPY']
+'fileTypes': ['PLX','PLXCOPY', 'PLXMACRO']
 
 'patterns': [
     { 'include': '#line-too-long-rule' },
