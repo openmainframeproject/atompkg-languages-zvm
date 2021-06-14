@@ -20,7 +20,7 @@
 
 'scopeName': 'source.zvmplx'
 'name': 'z/VM PL/X'
-'fileTypes': ['PLX','COPY']
+'fileTypes': ['PLX','PLXCOPY', 'PLXMACRO']
 
 'patterns': [
     { 'include': '#line-too-long-rule' },
@@ -49,21 +49,17 @@
       'match': '\\b(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))\\b'
       'name': 'constant.numeric.zvmplx'
     }
-    { # TODO Too many captures values for regex
-      'match': '([@][(?i)ASSERT|CREATE|DISABLE|ENABLE|ENDCREATE|ENDLOGIC|ENDSEGMENT|FORMAT|INCLUDE|LOGIC|PROCESS|PUSH|POP|SEGMENT|SPACE|PROCESS|ENDGEN|LIST])(\\s*)(\\w*)'
+    {
+      'match': '([@]((?i)ASSERT|CREATE|DISABLE|ENABLE|ENDCREATE|ENDLOGIC|ENDSEGMENT|FORMAT|INCLUDE|LOGIC|PROCESS|PUSH|POP|SEGMENT|SPACE|PROCESS|ENDGEN|LIST))\\s*(\\w*)'
       'captures':
         '0':
-            'name': 'constant.language.zvmplx' #'entity.name.function.zvmplx'
+            'name': 'constant.language.zvmplx' # 'entity.name.function.zvmplx'
         '1':
-            'name': 'keyword.control.zvmplx' #@E
+            'name': 'keyword.control.zvmplx' # @EJECT
         '2':
-            'name': 'entity.name.function.zvmplx'
+            'name': 'keyword.control.zvmplx' # EJECT
         '3':
-            'name': 'keyword.control.zvmplx'  #JECT
-        '4':
-            'name': 'constant.language.zvmplx' #'entity.name.function.zvmplx'
-        '5':
-            'name': 'constant.language.zvmplx' #'entity.name.function.zvmplx'
+            'name': 'entity.name.function.zvmplx'
       'name':  'constant.language.zvmplx' #'entity.name.function.zvmplx'
     }
     { # TODO Could be tighter
