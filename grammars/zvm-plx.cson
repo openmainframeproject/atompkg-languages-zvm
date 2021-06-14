@@ -146,7 +146,6 @@
       'name': 'comment.block.zvmplx'
     },
     'line-comment-rule': {
-      # TODO see which works better \Z metacharacter or \\n
       'begin': '!'
       'end': '\\n'
       'name': 'comment.line.zvmplx'
