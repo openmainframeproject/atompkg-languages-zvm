@@ -51,7 +51,7 @@
     },
     'register-variable-rule': {
       # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
-      'match': '([R|r][0-9][0-5]?)\\b'
+      'match': '\\b([R|r]([0-9]|1[0-5]))\\b'
       'name':  'keyword.operator.zvmasm'
     },
     'register-equate-rule': {

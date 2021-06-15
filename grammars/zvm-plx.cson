@@ -25,6 +25,7 @@
 'patterns': [
     { 'include': '#line-too-long-rule' },
     { 'include': '#sequence-number-rule' },
+    { 'include': '#register-variable-rule'},
     { 'include': '#block-logic-rule' },
     { 'include': '#block-comment-rule' },
     { 'include': '#line-comment-rule' },
@@ -61,10 +62,6 @@
         '3':
             'name': 'entity.name.function.zvmplx'
       'name':  'constant.language.zvmplx' #'entity.name.function.zvmplx'
-    }
-    { # TODO Could be tighter
-      'match': '\\b([R|r][0-9][0-5]?)\\b'
-      'name':  'keyword.operator.zvmplx'
     }
     { # TODO isn't captures-0 an alias for name?  is variable. a valid root?
       'match': '^[^\\*\\s]*\\b'
@@ -106,6 +103,10 @@
       # TODO this should only worry about rightmost 8 columns
       'match': '[0-9]{8}\\n'
       'name': 'comment.line.zvmplx'
+    },
+    'register-variable-rule': {
+      'match': '\\b([R|r]([0-9]|1[0-5]))\\b'
+      'name':  'keyword.operator.zvmplx'
     },
     'block-generate-rule': {
       # TODO support parameters
