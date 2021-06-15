@@ -100,8 +100,8 @@
     },
     'sequence-number-rule': {
       # TODO see if line-too-long-rule can be included from asm grammar
-      # TODO this should only worry about rightmost 8 columns
-      'match': '[0-9]{8}\\n'
+      # This only takes into consideration 8 digits [0-9] after 72 characters
+      'match': '(?<=.{72})[0-9]{8}\\n'
       'name': 'comment.line.zvmplx'
     },
     'register-variable-rule': {
