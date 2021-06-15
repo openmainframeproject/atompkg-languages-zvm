@@ -63,11 +63,11 @@
             'name': 'entity.name.function.zvmplx'
       'name':  'constant.language.zvmplx' #'entity.name.function.zvmplx'
     }
-    { # TODO isn't captures-0 an alias for name?  is variable. a valid root?
+    {
       'match': '^[^\\*\\s]*\\b'
       'captures':
           '0':
-              'name': 'variable.zvmplx'
+              'name': 'entity.name.function.zvmplx'
       'name': 'meta.function.zvmplx'
     }
     {
