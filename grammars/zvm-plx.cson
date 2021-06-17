@@ -29,6 +29,9 @@
     { 'include': '#block-logic-rule' },
     { 'include': '#block-comment-rule' },
     { 'include': '#line-comment-rule' },
+    { 'include': '#numeric-constant-rule' },
+    { 'include': '#binary-constant-rule' },
+    { 'include': '#hexadecimal-constant-rule' },
     { 'include': '#block-generate-rule' },
     { 'include': '#single-quoted-string-rule' },
     { 'include': '#double-quoted-string-rule' },
@@ -42,14 +45,6 @@
     { 'include': '#list-control4-rule' },
     { 'include': '#begin-statement-rule' },
 
-      # TODO Handle "extended decimal constants"
-      # TODO Handle "hexadecimal arithmetic constants"
-      # TODO Handle "binary constants"
-      # TODO Probably want to use lookahead for many //b delimiters, e.g. after X etc on a "bit constant" in the quoted string rules
-    {
-      'match': '\\b(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))\\b'
-      'name': 'constant.numeric.zvmplx'
-    }
     {
       'match': '([@]((?i)ASSERT|CREATE|DISABLE|ENABLE|ENDCREATE|ENDLOGIC|ENDSEGMENT|FORMAT|INCLUDE|LOGIC|PROCESS|PUSH|POP|SEGMENT|SPACE|PROCESS|ENDGEN|LIST))\\s*(\\w*)'
       'captures':
@@ -151,6 +146,17 @@
       'end': '\\n'
       'name': 'comment.line.zvmplx'
     },
+    'numeric-constant-rule': {
+        # Handles normal decimals as well as decimals written in scientific notation
+        'match': '\\b(([0-9]{1,32}[\\.?][0-9]*)|([0-9]{1,32}[E|e][-][0-9]{1,2}))\\b'
+        'name': 'constant.numeric.zvmplx'
+    },
+    'binary-constant-rule': {
+        # Handles normal binaries as well as decimans written in scientific notation
+        'match': '\\b(([1|0]{1,32}[\\.[1|0]*[B|b])|([1|0]+[E|e][-]?[0-9]{1,2}[B|b])))\\b'
+        'name': 'constant.binary.zvmplx'
+    },
+    # TODO Handle "hexadecimal arithmetic constants"
     'single-quoted-string-rule': {
       # See notes on double-quoted-string-rule, same rules
       'begin': '\''
