@@ -146,6 +146,7 @@
       'end': '\\n'
       'name': 'comment.line.zvmplx'
     },
+    # Matching for single quotes around the contants is not required as #signle-quoted-string-rule takes care of it.
     'numeric-constant-rule': {
         # Handles normal decimals as well as decimals written in scientific notation
         'match': '\\b(([0-9]{1,32}[\\.?][0-9]*)|([0-9]{1,32}[E|e][-][0-9]{1,2}))\\b'
@@ -153,10 +154,14 @@
     },
     'binary-constant-rule': {
         # Handles normal binaries as well as decimans written in scientific notation
-        'match': '\\b(([1|0]{1,32}[\\.[1|0]*[B|b])|([1|0]+[E|e][-]?[0-9]{1,2}[B|b])))\\b'
+        'match': '\\b((([1|0]{1,32}[\.[1|0]*)|([1|0]+[E|e][-]?[0-9]{1,2}))[B|b])\\b'
         'name': 'constant.binary.zvmplx'
     },
-    # TODO Handle "hexadecimal arithmetic constants"
+    'hexadecimal-constant-rule': {
+        # Handles normal hexadecimal constants.
+        'match': '\\b([a-f0-9]{1,32}[X|x])\\b'
+        'name': 'constant.hexadecimal.zvmplx'
+    },
     'single-quoted-string-rule': {
       # See notes on double-quoted-string-rule, same rules
       'begin': '\''
