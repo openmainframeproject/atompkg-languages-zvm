@@ -149,18 +149,18 @@
     # Matching for single quotes around the contants is not required as #signle-quoted-string-rule takes care of it.
     'numeric-constant-rule': {
         # Handles normal decimals as well as decimals written in scientific notation
-        'match': '\\b(([0-9]{1,32}[\\.?][0-9]*)|([0-9]{1,32}[E|e][-][0-9]{1,2}))\\b'
+        'match': '\\b(([0-9]{1,32}[E|e][-][0-9]{1,2})|([0-9]{1,32}([\\.][0-9]+)?))\\b'
         'name': 'constant.numeric.zvmplx'
     },
     'binary-constant-rule': {
         # Handles normal binaries as well as decimans written in scientific notation
-        'match': '\\b((([1|0]{1,32}[\.][1|0]*)|([1|0]+[E|e][-]?[0-9]{1,2}))[B|b])\\b'
-        'name': 'constant.binary.zvmplx'
+        'match': '\\b([\'](([1|0]{1,32}[\.]?[1|0]*)|([1|0]+[E|e][-|+]?[0-9]{1,2}))[\'][B|b])\\b'
+        'name': 'constant.numeric.zvmplx'
     },
     'hexadecimal-constant-rule': {
         # Handles normal hexadecimal constants.
-        'match': '\\b([a-f0-9]{1,32}[X|x])\\b'
-        'name': 'constant.hexadecimal.zvmplx'
+        'match': '\\b([\']?[a-fA-Z0-9]{1,32}[\']?[X|x]?)\\b'
+        'name': 'constant.numeric.zvmplx'
     },
     'single-quoted-string-rule': {
       # See notes on double-quoted-string-rule, same rules
