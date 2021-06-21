@@ -16,8 +16,6 @@
 # Behavioral notes
 # - If a line matches line-too-long, it does NOT match others like uncontinued-statement (provable using editor:log-cursor-scope)
 
-# TODO No-auto-indent works better with PLX (seems likely), if so doc in readme
-
 'scopeName': 'source.zvmplx'
 'name': 'z/VM PL/X'
 'fileTypes': ['PLX','PLXCOPY', 'PLXMACRO']
@@ -89,12 +87,10 @@
       # Anything over 80 characters makes line came up red with 'match': '.*(?<=.{80}).+'
       # (?<=...) = negative lookbehind
       # This tests for 72 chars plus anything BUT a sequence number or whitespace
-      # TODO see if line-too-long-rule can be included from asm grammar
       'match': '.*(?<=.{72})(([^0-9 \\r\\n]+)|([0-9 \\r\\n]{8}.+))'
       'name': 'invalid.illegal.zvmplx'
     },
     'sequence-number-rule': {
-      # TODO see if line-too-long-rule can be included from asm grammar
       # This only takes into consideration 8 digits [0-9] after 72 characters
       'match': '(?<=.{72})[0-9]{8}\\n'
       'name': 'comment.line.zvmplx'
@@ -104,7 +100,6 @@
       'name':  'keyword.operator.zvmplx'
     },
     'block-generate-rule': {
-      # TODO support parameters
       'begin': '((?i)generate)\\s*[;]\\s*([/][*].*)?'
       'beginCaptures':
           '1':
