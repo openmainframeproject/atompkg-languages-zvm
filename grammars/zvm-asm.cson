@@ -50,9 +50,8 @@
       'name': 'comment.line.zvmasm'
     },
     'register-variable-rule': {
-      # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
       'match': '\\b([R|r]([0-9]|1[0-5]))\\b'
-      'name':  'keyword.operator.zvmasm'
+      'name':  'variable.parameter.zvmasm'
     },
     'register-equate-rule': {
       # * >> + on whitespace after EQU
