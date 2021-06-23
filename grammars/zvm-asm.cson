@@ -39,9 +39,8 @@
 
 'repository': {
     'line-too-long-rule': {
-      # Anything over 80 characters makes line come up red
-      # TODO really want this test to be >72 plus anything BUT a sequence number or blanks
-      'match': '.*(?<=.{80}).+'
+      # Anything over 80 characters makes line come up red except 8 trailing digits
+      'match': '.*(?<=.{72})(([^0-9 \\r\\n]+)|([0-9 \\r\\n]{8}.+))'
       'name': 'invalid.illegal.zvmasm'
     },
     'sequence-number-rule': {
