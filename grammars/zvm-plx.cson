@@ -16,8 +16,6 @@
 # Behavioral notes
 # - If a line matches line-too-long, it does NOT match others like uncontinued-statement (provable using editor:log-cursor-scope)
 
-# TODO No-auto-indent works better with PLX (seems likely), if so doc in readme
-
 'scopeName': 'source.zvmplx'
 'name': 'z/VM PL/X'
 'fileTypes': ['PLX','PLXCOPY', 'PLXMACRO']
@@ -25,9 +23,13 @@
 'patterns': [
     { 'include': '#line-too-long-rule' },
     { 'include': '#sequence-number-rule' },
+    { 'include': '#register-variable-rule'},
     { 'include': '#block-logic-rule' },
     { 'include': '#block-comment-rule' },
     { 'include': '#line-comment-rule' },
+    { 'include': '#numeric-constant-rule' },
+    { 'include': '#binary-constant-rule' },
+    { 'include': '#hexadecimal-constant-rule' },
     { 'include': '#block-generate-rule' },
     { 'include': '#single-quoted-string-rule' },
     { 'include': '#double-quoted-string-rule' },
@@ -41,14 +43,6 @@
     { 'include': '#list-control4-rule' },
     { 'include': '#begin-statement-rule' },
 
-      # TODO Handle "extended decimal constants"
-      # TODO Handle "hexadecimal arithmetic constants"
-      # TODO Handle "binary constants"
-      # TODO Probably want to use lookahead for many //b delimiters, e.g. after X etc on a "bit constant" in the quoted string rules
-    {
-      'match': '\\b(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))\\b'
-      'name': 'constant.numeric.zvmplx'
-    }
     {
       'match': '([@]((?i)ASSERT|CREATE|DISABLE|ENABLE|ENDCREATE|ENDLOGIC|ENDSEGMENT|FORMAT|INCLUDE|LOGIC|PROCESS|PUSH|POP|SEGMENT|SPACE|PROCESS|ENDGEN|LIST))\\s*(\\w*)'
       'captures':
@@ -62,15 +56,11 @@
             'name': 'entity.name.function.zvmplx'
       'name':  'constant.language.zvmplx' #'entity.name.function.zvmplx'
     }
-    { # TODO Could be tighter
-      'match': '\\b([R|r][0-9][0-5]?)\\b'
-      'name':  'keyword.operator.zvmplx'
-    }
-    { # TODO isn't captures-0 an alias for name?  is variable. a valid root?
+    {
       'match': '^[^\\*\\s]*\\b'
       'captures':
           '0':
-              'name': 'variable.zvmplx'
+              'name': 'entity.name.function.zvmplx'
       'name': 'meta.function.zvmplx'
     }
     {
@@ -78,7 +68,7 @@
       'name': 'keyword.control.zvmplx'
     }
     {
-      'match': '\\b((?i)_Bool|_Complex|_Imaginary|bool|char|double|float|int|long|short|signed|size_t|unsigned_of|signed_of|void|FIXED|BIT|CHAR|CONSTANT|POINTER|PTR|SYSLIB|DEFINED|CHARACTER|DESTROY|NONLOCAL|EXTERNAL|SYSUT5|ABS|ALET|ARGADDR|ARGCOUNT|AUTOSIZE|BIT_OF|BITPOS|CacheLnExcl|CLExcl|ARGADDR|CHAR_OF|CONDCODEMASK|CCMASK|DIM|EVAL|FIXED_OF|HBOUND|HVAL_OF|IGNREADONLY|IGNRO|INDEX|LBOUND|LVAL_OF|LVAL|ARGADDR|OFFSET|OMITTED|POINTER_OF|PTR_OF|PTROFF|SIZE|SPACEID|STORAGE|SUBSTRLEN|SYSDATE|SYSDATEC|SYSPARM|SYSTIME|TRANSLATE|TRANS|VERIFY|VET|VIAADDR|VIAPOINTER|VIAPTR|NULL|MAX|MIN|TRUE|FALSE|ON|OFF|YES|NO|__LINE__|__DATA__|__FILE__|__func__|__TIME__|__STDC__|LOCK|ACTION|HOLD|CODE|BDY|BOUNDARY)\\b(\\s*)'
+      'match': '\\b((?i)_Bool|_Complex|_Imaginary|bool|char|double|float|int|long|short|signed|size_t|unsigned_of|signed_of|void|BINARY|COMPLEX|DECIMAL|ENTRY|FILE|FIXED|PICTURE|PRECISION|REAL|RETURNS|STRUCTURE|VARYING|VARYING4|VARYINGZ|WIDECHAR|TYPE|BIT|CHAR|CONSTANT|POINTER|PTR|SYSLIB|DEFINED|CHARACTER|DESTROY|NONLOCAL|EXTERNAL|SYSUT5|ABS|ALET|ARGADDR|ARGCOUNT|AUTOSIZE|BIT_OF|BITPOS|CacheLnExcl|CLExcl|ARGADDR|CHAR_OF|CONDCODEMASK|CCMASK|DIM|EVAL|FIXED_OF|HBOUND|HVAL_OF|IGNREADONLY|IGNRO|INDEX|LBOUND|LVAL_OF|LVAL|ARGADDR|OFFSET|OMITTED|POINTER_OF|PTR_OF|PTROFF|SIZE|SPACEID|STORAGE|SUBSTRLEN|SYSDATE|SYSDATEC|SYSPARM|SYSTIME|TRANSLATE|TRANS|VERIFY|VET|VIAADDR|VIAPOINTER|VIAPTR|NULL|MAX|MIN|TRUE|FALSE|ON|OFF|YES|NO|__LINE__|__DATA__|__FILE__|__func__|__TIME__|__STDC__|LOCK|ACTION|HOLD|CODE|BDY|BOUNDARY)\\b(\\s*)'
       'name': 'storage.type.zvmplx'
     }
     { # - Tried using a non-capturing group (?:...) for the open-paren [(] so the paren is
@@ -97,18 +87,19 @@
       # Anything over 80 characters makes line came up red with 'match': '.*(?<=.{80}).+'
       # (?<=...) = negative lookbehind
       # This tests for 72 chars plus anything BUT a sequence number or whitespace
-      # TODO see if line-too-long-rule can be included from asm grammar
       'match': '.*(?<=.{72})(([^0-9 \\r\\n]+)|([0-9 \\r\\n]{8}.+))'
       'name': 'invalid.illegal.zvmplx'
     },
     'sequence-number-rule': {
-      # TODO see if line-too-long-rule can be included from asm grammar
-      # TODO this should only worry about rightmost 8 columns
-      'match': '[0-9]{8}\\n'
+      # This only takes into consideration 8 digits [0-9] after 72 characters
+      'match': '(?<=.{72})[0-9]{8}\\n'
       'name': 'comment.line.zvmplx'
     },
+    'register-variable-rule': {
+      'match': '\\b([R|r]([0-9]|1[0-5]))\\b'
+      'name':  'keyword.operator.zvmplx'
+    },
     'block-generate-rule': {
-      # TODO support parameters
       'begin': '((?i)generate)\\s*[;]\\s*([/][*].*)?'
       'beginCaptures':
           '1':
@@ -146,10 +137,25 @@
       'name': 'comment.block.zvmplx'
     },
     'line-comment-rule': {
-      # TODO see which works better \Z metacharacter or \\n
       'begin': '!'
       'end': '\\n'
       'name': 'comment.line.zvmplx'
+    },
+    # Matching for single quotes around the contants is not required as #signle-quoted-string-rule takes care of it.
+    'numeric-constant-rule': {
+        # Handles normal decimals as well as decimals written in scientific notation
+        'match': '\\b(([0-9]{1,32}[E|e][-][0-9]{1,2})|([0-9]{1,32}([\\.][0-9]+)?))\\b'
+        'name': 'constant.numeric.zvmplx'
+    },
+    'binary-constant-rule': {
+        # Handles normal binaries as well as decimans written in scientific notation
+        'match': '\\b([\'](([1|0]{1,32}[\.]?[1|0]*)|([1|0]+[E|e][-|+]?[0-9]{1,2}))[\'][B|b])\\b'
+        'name': 'constant.numeric.zvmplx'
+    },
+    'hexadecimal-constant-rule': {
+        # Handles normal hexadecimal constants.
+        'match': '\\b([\']?[a-fA-Z0-9]{1,32}[\']?[X|x]?)\\b'
+        'name': 'constant.numeric.zvmplx'
     },
     'single-quoted-string-rule': {
       # See notes on double-quoted-string-rule, same rules
