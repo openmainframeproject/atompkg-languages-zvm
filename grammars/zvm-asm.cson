@@ -94,12 +94,15 @@
       'name': 'comment.line.zvmasm'
     },
     'continuation-line-rule': {
-      # TODO See if lookahead could be used to distinguish comments from operands
-      'match': '^[ ]{15}([A-Za-z0-9@$#_+-,=.*()\'/&]+)([ ]+.*)?'
+      # Regex will start by searching for '*' then check if line is terminated and from the next line,
+      # check for 15 spaces followed by syntax matchings.
+      'match': '(\\*\\n[ ]{15})([A-Za-z0-9@$#_+-,=.*()\'\/&]+)([ ]+.*)?'
       'captures':
-          #'1': # Continued operands, leave as normal source by default
+          '1':
+              'name': 'comment.character.zvmasm'
           '2': # remarks
               'name': 'comment.line.zvmasm'
+          # '3': operands. leave as normal source be default
     },
     'uncontinued-statement-rule': {
       # TODO Handle corner cases where space does not signal end of operands
