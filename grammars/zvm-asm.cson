@@ -29,7 +29,8 @@
     { 'include': '#continuation-line-rule' },
     { 'include': '#continuation-remarks-rule' },
     { 'include': '#uncontinued-comment-rule' },
-    { 'include': '#uncontinued-statement-rule' },
+    # TODO Break the uncontinued-statement-rule into multiple smaller parts
+    # { 'include': '#uncontinued-statement-rule' },
     { 'include': '#sequence-number-rule' },
     { 'include': '#register-variable-rule' },
     { 'include': '#register-equate-rule' },
@@ -89,17 +90,25 @@
     'continuation-remarks-rule': {
       # Essentially no wiggle room in the manual here: >15 spaces to start means it's remarks.
       # It's technically permitted that the operation field could begin 16 on a non-continuation line, so this CAN match spuriously
-      # TODO See if lookbehind can be used confirm this is a continuation line.  I'm skeptical.
-      'match': '^[ ]{16,}.*'
+      # A single pattern match will not allow matching patter across multiple lines.
+      # For detailed explaination refer https://github.com/atom/first-mate/issues/57#issuecomment-137492363
+      'begin': '(\\*\\n)'
+      'beginCaptures':
+          '1':
+              'name': 'comment.character.zvmasm'
+      'end': '[\\s]{16,}.*'
+      # Let the source handle the endCaptures
       'name': 'comment.line.zvmasm'
     },
     'continuation-line-rule': {
-      # TODO See if lookahead could be used to distinguish comments from operands
-      'match': '^[ ]{15}([A-Za-z0-9@$#_+-,=.*()\'/&]+)([ ]+.*)?'
-      'captures':
-          #'1': # Continued operands, leave as normal source by default
-          '2': # remarks
-              'name': 'comment.line.zvmasm'
+      # A single pattern match will not allow matching patter across multiple lines.
+      # For detailed explaination refer https://github.com/atom/first-mate/issues/57#issuecomment-137492363
+      'begin': '(\\*\\n)'
+      'beginCaptures':
+          '1':
+              'name': 'comment.character.zvmasm'
+      'end': '([\\s]{0,15}([A-Za-z0-9@$#_+-,=.*()\'\/&]+)([ ]+.*)?)'
+      # Let the source handle the endCaptures
     },
     'uncontinued-statement-rule': {
       # TODO Handle corner cases where space does not signal end of operands
