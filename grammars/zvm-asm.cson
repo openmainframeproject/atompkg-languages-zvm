@@ -54,28 +54,15 @@
       'name':  'variable.parameter.zvmasm'
     },
     'register-equate-rule': {
-      # * >> + on whitespace after EQU
-      # case-insensitive the EQU which pushed other indices up 1
-      # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
-      # TODO verify capturing; original had 7 indices but only 6 groups
-      'match': '((?i)EQU)[\\s]+([^\\s\']*)(\'.*\'|)([^\\s]*)([^\\s]*)([^@\\n]*)([^@0-9]{2})'
+      # Register matching not included as a capture group 'cus it will create a conflict with register-variable-rule.
+      # Let it capture registers. Additionally starting the match from EQU expands the highlighting scope of this pattern.
+      # Also not included string matching as a 4th capturing group for the same reason
+      'match': '((?i)EQU)(\\s+)([^\\s\']*)\\b'
       'captures':
           '1':
-              'name': 'storage.type.zasm'
-          '2':
-              'name': 'storage.type.zasm'
+              'name': 'storage.type.zvmasm'
           '3':
-              'name': 'string.quoted.single.zasm'
-          '4':
-              'name': 'comment.line.zasm'
-          '5':
-              'name': 'comment.line.zasm'
-          '6':
-              'name': 'comment.line.zasm'
-          '7':
-              'name': 'comment.line.zasm'
-          '8':
-              'name': 'entity.name.tag.zasm'
+              'name': 'constant.numeric.zvmasm'
       'name': 'keyword.operator.zasm'
     },
     'single-quoted-string-rule': {
