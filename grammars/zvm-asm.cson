@@ -16,10 +16,6 @@
 # Behavioral notes
 # - If a line matches line-too-long, it does NOT match others like uncontinued-statement (provable using editor:log-cursor-scope)
 
-# TODO: highlight commas, end parens, etc.
-# TODO: support variables in symbols
-# TODO: ?support macro statements
-
 'scopeName': 'source.zvmasm'
 'name': 'z/VM assembler'
 'fileTypes': ['ASM', 'asm','assemble','macro','repos','s']
@@ -29,13 +25,15 @@
     { 'include': '#continuation-line-rule' },
     { 'include': '#continuation-remarks-rule' },
     { 'include': '#uncontinued-comment-rule' },
+    { 'include': '#macro-rule' },
     # TODO Break the uncontinued-statement-rule into multiple smaller parts
     # { 'include': '#uncontinued-statement-rule' },
-    { 'include': '#sequence-number-rule' },
     { 'include': '#register-equate-rule' },
+    { 'include': '#sequence-number-rule' },
+    { 'include': '#declare-rule' },
     { 'include': '#register-variable-rule' },
     { 'include': '#single-quoted-string-rule' },
-    { 'include': '#declare-rule' },
+    { 'include': '#parenthesis-rule' }
 ]
 
 'repository': {
@@ -68,8 +66,15 @@
       'name': 'keyword.operator.zasm'
     },
     'single-quoted-string-rule': {
-      'match': '(\'.*\')'
-      'name': 'string.quoted.single.zvmasm'
+      'begin': '\''
+      'beginCaptures':
+          '1':
+              'name': 'string.quoted.single.zvmasm'
+      'end': '\''
+      'endCaptures':
+          '1':
+              'name': 'string.quoted.single.zvmasm'
+      'contentName': 'string.quoted.single.zvmasm'
     },
     'uncontinued-comment-rule': {
       # Handles normal comments and macro comments, which are permitted in open code
@@ -100,7 +105,7 @@
       # Let the source handle the endCaptures
     },
     'uncontinued-statement-rule': {
-      # TODO Handle corner cases where space does not signal end of operands
+      # TODO improve handling of smaller and more particular cases 
       # Structure: line-begin, optional label, required space(s), required operation, optional portion
       #            optional portion: required space(s), operands (optional to keep portion optional), space, remarks
       'match': '^([A-Za-z][A-Za-z0-9@$#_]*)?([ ]+)([A-Za-z][A-Za-z0-9]*)([ ]+[^ ]+)?(.*)'
@@ -114,6 +119,31 @@
           '5': # remarks
               'name': 'comment.line.zvmasm'
     },
+    'macro-rule': {
+        'begin': '((?i)MACRO)'
+        'beginCaptures':
+            '0':
+                'name': 'character.parenthesis.zvmasm'
+        'patterns': [
+            { include = "$self" },
+            {
+                'match': '\\.\\*.*\\n'
+                'name': 'comment.line.zvmasm'
+                'comment': 'comments'
+            },
+            {
+                'match': '(\\.)(\\w+)'
+                'captures':
+                    '2':
+                        'name': 'variable.other.zvmasm'
+                'comment': ''
+            }
+        ]
+        'end': '((?i)MEND)'
+        'endCaptures':
+            '0':
+                'name': 'character.parenthesis.zvmasm'
+    }
     'declare-rule': {
       # vs original, made DC/DS case-insensitive which pushed capture group numbers up 1
       # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
@@ -135,10 +165,21 @@
               'name': 'comment.line.zvmasm'
           '8':
               'name': 'entity.name.tag.zvmasm'
-
       'name': 'keyword.operator.zvmasm'
     },
-
+    'parenthesis-rule': {
+        'begin': '\\('
+        'beginCaptures':
+            '0':
+                'name': 'character.parenthesis.zvmasm'
+        'end': '\\)'
+        'endCaptures':
+            '0':
+                'name': 'character.parenthesis.zvmasm'
+        'patterns': [
+            { include = "$self" },
+        ]
+    }
 }
 
 
