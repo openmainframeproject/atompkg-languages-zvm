@@ -32,8 +32,8 @@
     # TODO Break the uncontinued-statement-rule into multiple smaller parts
     # { 'include': '#uncontinued-statement-rule' },
     { 'include': '#sequence-number-rule' },
-    { 'include': '#register-variable-rule' },
     { 'include': '#register-equate-rule' },
+    { 'include': '#register-variable-rule' },
     { 'include': '#single-quoted-string-rule' },
     { 'include': '#declare-rule' },
 ]
@@ -51,15 +51,17 @@
     },
     'register-variable-rule': {
       'match': '\\b([R|r]([0-9]|1[0-5]))\\b'
-      'name':  'variable.parameter.zvmasm'
+      'name':  'variable.other.zvmasm'
     },
     'register-equate-rule': {
       # Register matching not included as a capture group 'cus it will create a conflict with register-variable-rule.
       # Let it capture registers. Additionally starting the match from EQU expands the highlighting scope of this pattern.
       # Also not included string matching as a 4th capturing group for the same reason
-      'match': '((?i)EQU)(\\s+)([^\\s\']*)\\b'
+      'match': '(\\w+\\s+)((?i)EQU\\s+)([^\\s\']*)\\b'
       'captures':
           '1':
+              'name': 'variable.other.zvmasm'
+          '2':
               'name': 'storage.type.zvmasm'
           '3':
               'name': 'constant.numeric.zvmasm'
