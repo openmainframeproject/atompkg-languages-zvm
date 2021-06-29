@@ -68,11 +68,11 @@
     'single-quoted-string-rule': {
       'begin': '\''
       'beginCaptures':
-          '1':
+          '0':
               'name': 'string.quoted.single.zvmasm'
       'end': '\''
       'endCaptures':
-          '1':
+          '0':
               'name': 'string.quoted.single.zvmasm'
       'contentName': 'string.quoted.single.zvmasm'
     },
@@ -105,7 +105,7 @@
       # Let the source handle the endCaptures
     },
     'uncontinued-statement-rule': {
-      # TODO improve handling of smaller and more particular cases 
+      # TODO improve handling of smaller and more particular cases
       # Structure: line-begin, optional label, required space(s), required operation, optional portion
       #            optional portion: required space(s), operands (optional to keep portion optional), space, remarks
       'match': '^([A-Za-z][A-Za-z0-9@$#_]*)?([ ]+)([A-Za-z][A-Za-z0-9]*)([ ]+[^ ]+)?(.*)'
@@ -123,7 +123,7 @@
         'begin': '((?i)MACRO)'
         'beginCaptures':
             '0':
-                'name': 'character.parenthesis.zvmasm'
+                'name': 'meta.entity.name.zvmasm'
         'patterns': [
             { include = "$self" },
             {
@@ -136,18 +136,17 @@
                 'captures':
                     '2':
                         'name': 'variable.other.zvmasm'
-                'comment': ''
+                'comment': 'go-to variables'
             }
         ]
         'end': '((?i)MEND)'
         'endCaptures':
             '0':
-                'name': 'character.parenthesis.zvmasm'
+                'name': 'meta.entity.name.zvmasm'
     }
     'declare-rule': {
       # vs original, made DC/DS case-insensitive which pushed capture group numbers up 1
-      # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
-      'match': '\\b((?i)D[C|S])[\\s]*([0-9]*|\\(.*\\))([A-Z][DUBH]?)(L?[0-9]*)(\'.*\'|\\s)([^\\s]*)([^@\\n]*)([^@0-9]{2})'
+      'match': '\\b((?i)D[C|S])[\\s]*([0-9]*|\\(.*\\))([A-Z0-9][DUBH]?)(L?[0-9]*)(\'.*\'|\\s)([^\\s]*)([^@\\n]*)'
       'captures':
           '1':
               'name': 'storage.type.zvmasm'
@@ -155,17 +154,13 @@
               'name': 'storage.type.zvmasm'
           '3':
               'name': 'storage.type.zvmasm'
-          '4':
-              'name': 'comment.line.zvmasm'
           '5':
               'name': 'string.quoted.single.zvmasm'
           '6':
-              'name': 'comment.line.zvmasm'
+              'name': 'variable.parameter.zvmasm'
           '7':
               'name': 'comment.line.zvmasm'
-          '8':
-              'name': 'entity.name.tag.zvmasm'
-      'name': 'keyword.operator.zvmasm'
+      # 'name': 'keyword.operator.zvmasm'
     },
     'parenthesis-rule': {
         'begin': '\\('
