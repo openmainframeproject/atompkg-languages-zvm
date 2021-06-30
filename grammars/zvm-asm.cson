@@ -16,10 +16,6 @@
 # Behavioral notes
 # - If a line matches line-too-long, it does NOT match others like uncontinued-statement (provable using editor:log-cursor-scope)
 
-# TODO: highlight commas, end parens, etc.
-# TODO: support variables in symbols
-# TODO: ?support macro statements
-
 'scopeName': 'source.zvmasm'
 'name': 'z/VM assembler'
 'fileTypes': ['ASM', 'asm','assemble','macro','repos','s']
@@ -29,19 +25,21 @@
     { 'include': '#continuation-line-rule' },
     { 'include': '#continuation-remarks-rule' },
     { 'include': '#uncontinued-comment-rule' },
-    { 'include': '#uncontinued-statement-rule' },
-    { 'include': '#sequence-number-rule' },
-    { 'include': '#register-variable-rule' },
+    { 'include': '#macro-rule' },
+    # TODO Break the uncontinued-statement-rule into multiple smaller parts
+    # { 'include': '#uncontinued-statement-rule' },
     { 'include': '#register-equate-rule' },
-    { 'include': '#single-quoted-string-rule' },
+    { 'include': '#sequence-number-rule' },
     { 'include': '#declare-rule' },
+    { 'include': '#register-variable-rule' },
+    { 'include': '#single-quoted-string-rule' },
+    { 'include': '#parenthesis-rule' }
 ]
 
 'repository': {
     'line-too-long-rule': {
-      # Anything over 80 characters makes line come up red
-      # TODO really want this test to be >72 plus anything BUT a sequence number or blanks
-      'match': '.*(?<=.{80}).+'
+      # Anything over 80 characters makes line come up red except 8 trailing digits
+      'match': '.*(?<=.{72})(([^0-9 \\r\\n]+)|([0-9 \\r\\n]{8}.+))'
       'name': 'invalid.illegal.zvmasm'
     },
     'sequence-number-rule': {
@@ -50,38 +48,33 @@
       'name': 'comment.line.zvmasm'
     },
     'register-variable-rule': {
-      # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
       'match': '\\b([R|r]([0-9]|1[0-5]))\\b'
-      'name':  'keyword.operator.zvmasm'
+      'name':  'variable.other.zvmasm'
     },
     'register-equate-rule': {
-      # * >> + on whitespace after EQU
-      # case-insensitive the EQU which pushed other indices up 1
-      # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
-      # TODO verify capturing; original had 7 indices but only 6 groups
-      'match': '((?i)EQU)[\\s]+([^\\s\']*)(\'.*\'|)([^\\s]*)([^\\s]*)([^@\\n]*)([^@0-9]{2})'
+      # Register matching not included as a capture group 'cus it will create a conflict with register-variable-rule.
+      # Let it capture registers. Additionally starting the match from EQU expands the highlighting scope of this pattern.
+      # Also not included string matching as a 4th capturing group for the same reason
+      'match': '(\\w+\\s+)((?i)EQU\\s+)([^\\s\']*)\\b'
       'captures':
           '1':
-              'name': 'storage.type.zasm'
+              'name': 'variable.other.zvmasm'
           '2':
-              'name': 'storage.type.zasm'
+              'name': 'storage.type.zvmasm'
           '3':
-              'name': 'string.quoted.single.zasm'
-          '4':
-              'name': 'comment.line.zasm'
-          '5':
-              'name': 'comment.line.zasm'
-          '6':
-              'name': 'comment.line.zasm'
-          '7':
-              'name': 'comment.line.zasm'
-          '8':
-              'name': 'entity.name.tag.zasm'
+              'name': 'constant.numeric.zvmasm'
       'name': 'keyword.operator.zasm'
     },
     'single-quoted-string-rule': {
-      'match': '(\'.*\')'
-      'name': 'string.quoted.single.zvmasm'
+      'begin': '\''
+      'beginCaptures':
+          '0':
+              'name': 'string.quoted.single.zvmasm'
+      'end': '\''
+      'endCaptures':
+          '0':
+              'name': 'string.quoted.single.zvmasm'
+      'contentName': 'string.quoted.single.zvmasm'
     },
     'uncontinued-comment-rule': {
       # Handles normal comments and macro comments, which are permitted in open code
@@ -91,20 +84,28 @@
     'continuation-remarks-rule': {
       # Essentially no wiggle room in the manual here: >15 spaces to start means it's remarks.
       # It's technically permitted that the operation field could begin 16 on a non-continuation line, so this CAN match spuriously
-      # TODO See if lookbehind can be used confirm this is a continuation line.  I'm skeptical.
-      'match': '^[ ]{16,}.*'
+      # A single pattern match will not allow matching patter across multiple lines.
+      # For detailed explaination refer https://github.com/atom/first-mate/issues/57#issuecomment-137492363
+      'begin': '(\\*\\n)'
+      'beginCaptures':
+          '1':
+              'name': 'comment.character.zvmasm'
+      'end': '[\\s]{16,}.*'
+      # Let the source handle the endCaptures
       'name': 'comment.line.zvmasm'
     },
     'continuation-line-rule': {
-      # TODO See if lookahead could be used to distinguish comments from operands
-      'match': '^[ ]{15}([A-Za-z0-9@$#_+-,=.*()\'/&]+)([ ]+.*)?'
-      'captures':
-          #'1': # Continued operands, leave as normal source by default
-          '2': # remarks
-              'name': 'comment.line.zvmasm'
+      # A single pattern match will not allow matching patter across multiple lines.
+      # For detailed explaination refer https://github.com/atom/first-mate/issues/57#issuecomment-137492363
+      'begin': '(\\*\\n)'
+      'beginCaptures':
+          '1':
+              'name': 'comment.character.zvmasm'
+      'end': '([\\s]{0,15}([A-Za-z0-9@$#_+-,=.*()\'\/&]+)([ ]+.*)?)'
+      # Let the source handle the endCaptures
     },
     'uncontinued-statement-rule': {
-      # TODO Handle corner cases where space does not signal end of operands
+      # TODO improve handling of smaller and more particular cases
       # Structure: line-begin, optional label, required space(s), required operation, optional portion
       #            optional portion: required space(s), operands (optional to keep portion optional), space, remarks
       'match': '^([A-Za-z][A-Za-z0-9@$#_]*)?([ ]+)([A-Za-z][A-Za-z0-9]*)([ ]+[^ ]+)?(.*)'
@@ -118,31 +119,127 @@
           '5': # remarks
               'name': 'comment.line.zvmasm'
     },
+    'macro-rule': {
+        'begin': '((?i)MACRO)'
+        'beginCaptures':
+            '0':
+                'name': 'meta.entity.name.zvmasm'
+        'patterns': [
+            { include = "$self" },
+            {
+              # comments syntax inside macro blocks: .* something
+              'match': '\\.\\*.*\\n'
+              'name': 'comment.line.zvmasm'
+            },
+            {
+              'match': '(?i)(AIF|AGO|ANOP|AOD|LCLA|LCLB|LCLC|GBLA|GBLB|GBLC|SET[A|B|C]?|LM|CNOP)'
+              'name': 'keyword.control.zvmasm'
+            },
+            {
+              'match': '(?i)(MNOTE|MEXIT)'
+              'name': 'meta.entity.name.zvmasm'
+            },
+            {
+              # Relational operators
+              'match': '\\s+(EQ|NE|GT|GE|LT|LE)\\s+'
+              'name': 'keyword.operator.zvmasm'
+            },
+            {
+              # Variables in the form .variable_name
+              'match': '\\.(\\w+)'
+              'captures':
+                  '1':
+                      'name': 'variable.other.zvmasm'
+            },
+            {
+              # variables of the form &var_name. note that these are different from the ones of the form .var_name
+              'match': '&\\w+'
+              'name': 'variable.other.zvmasm'
+              'comment': 'variable symbols'
+            },
+            {
+              # Keyword statements
+              'match': '(^\\s*)\\b((?i)A|AD|ADB|ADBR|ADR|ADTR|AE|AEB|AEBR|AER|AFI|AG|AGF|AGFI|AGFR|AGHI|AGR|AGSI|AH|AHI|AHY|AL|ALC|ALCG|ALCGR|ALCR|ALFI|ALG|ALGF|ALGFI|ALGFR|ALGR|ALGSI|ALR|ALSI|ALY|AP|AR|ASI|AU|AUR|AW|AWR|AXBR|AXR|AXTR|AY|BAKR|BAL|BALR|BAS|BASR|BASSM|BC|BCR|BCT|BCTG|BCTGR|BCTR|BRAS|BRASL|BRC|BRCL|BRCT|BRCTG|BRXH|BRXHG|BRXLE|BRXLG|BSA|BSG|BSM|BXH|BXHG|BXLE|BXLEG|C|CD|CDB|CDBR|CDFBR|CDFR|CDGBR|CDGR|CDGTR|CDR|CDS|CDSG|CDSTR|CDSY|CDTR|CDUTR|CE|CEB|CEBR|CEDTR|CEFBR|CEFR|CEGBR|CEGR|CER|CEXTR|CFC|CFDBR|CFDR|CFEBR|CFER|CFI|CFXBR|CFXR|CG|CGDBR|CGDR|CGDTR|CGEBR|CGER|CGF|CGFI|CGFR|CGFRL|CGH|CGHI|CGHRL|CGHSI|CGIB|CGIJ|CGIT|CGR|CGRB|CGRJ|CGRL|CGRT|CGXBR|CGXR|CGXTR|CH|CHHSI|CHI|CHRL|CHSI|CHY|CIB|CIJ|CIT|CKSM|CL|CLC|CLCL|CLCLE|CLCLU|CLFHSI|CLFI|CLFIT|CLG|CLGF|CLGFI|CLGFR|CLGFRL|CLGHRL|CLGHSI|CLGIB|CLGIJ|CLGIT|CLGR|CLGRB|CLGRJ|CLGRL|CLGRT|CLHHSI|CLHRL|CLI|CLIB|CLIJ|CLIY|CLM|CLMH|CLMY|CLR|CLRB|CLRJ|CLRL|CLRT|CLST|CLY|CMPSC|CP|CPSDR|CPYA|CR|CRB|CRJ|CRL|CRT|CS|CSCH|CSDTR|CSG|CSP|CSPG|CSST|CSXTR|CSY|CU12|CU14|CU21|CU24|CU41|CU42|CUDTR|CUSE|CUTFU|CUUTF|CUXTR|CVB|CVBG|CVBY|CVD|CVDG|CVDY|CXBR|CXFBR|CXFR|CXGBR|CXGR|CXGTR|CXR|CXSTR|CXTR|CXUTR|CY|D|DD|DDB|DDBR|DDR|DDTR|DE|DEB|DEBR|DER|DIDBR|DIEBR|DL|DLG|DLGR|DLR|DP|DR|DSG|DSGF|DSGFR|DSGR|DXBR|DXR|DXTR|EAR|ECAG|ECTG|ED|EDMK|EEDTR|EEXTR|EFPC|EPAIR|EPAR|EPSW|EREG|EREGG|ESAIR|ESAR|ESDTR|ESEA|ESTA|ESXTR|EX|EXRL|FIDBR|FIDR|FIDTR|FIEBR|FIER|FIXBR|FIXR|FIXTR|FLOGR|HDR|HER|HSCH|IAC|IC|ICM|ICMH|ICMY|ICY|IDTE|IEDTR|IEXTR|IIHF|IIHH|IIHL|IILF|IILH|IILL|IPK|IPM|IPTE|ISKE|IVSK|KDB|KDBR|KDTR|KEB|KEBR|KIMD|KLMD|KM|KMAC|KMC|KXBR|KXTR|L|LA|LAE|LAEY|LAM|LAMY|LARL|LASP|LAY|LB|LBR|LCDBR|LCDFR|LCDR|LCEBR|LCER|LCGFR|LCGR|LCR|LCTL|LCTLG|LCXBR|LCXR|LD|LDE|LDEB|LDEBR|LDER|LDETR|LDGR|LDR|LDXBR|LDXR|LDXTR|LDY|LE|LEDBR|LEDR|LEDTR|LER|LEXBR|LEXR|LEY|LFAS|LFPC|LG|LGB|LGBR|LGDR|LGF|LGFI|LGFR|LGFRL|LGH|LGHI|LGHR|LGHRL|LGR|LGRL|LH|LHI|LHR|LHRL|LHY|LLC|LLCR|LLGC|LLGCR|LLGF|LLGFR|LLGFRL|LLGH|LLGHR|LLGHRL|LLGT|LLGTR|LLH|LLHR|LLHRL|LLIHF|LLIHH|LLIHL|LLILF|LLILH|LLILL|LM|LMD|LMG|LMH|LMY|LNDBR|LNDFR|LNDR|LNEBR|LNER|LNGFR|LNGR|LNR|LNXBR|LNXR|LPDBR|LPDFR|LPDR|LPEBR|LPER|LPGFR|LPGR|LPQ|LPR|LPSW|LPSWE|LPTEA|LPXBR|LPXR|LR|LRA|LRAG|LRAY|LRDR|LRER|LRL|LRV|LRVG|LRVGR|LRVH|LRVR|LT|LTDBR|LTDR|LTDTR|LTEBR|LTER|LTG|LTGF|LTGFR|LTGR|LTR|LTXBR|LTXR|LTXTR|LURA|LURAG|LXD|LXDB|LXDBR|LXDR|LXDTR|LXE|LXEB|LXEBR|LXER|LXR|LY|LZDR|LZER|LZXR|M|MAD|MADB|MADBR|MADR|MAE|MAEB|MAEBR|MAER|MAY|MAYH|MAYHR|MAYL|MAYLR|MAYR|MC|MD|MDB|MDBR|MDE|MDEB|MDEBR|MDER|MDR|MDTR|ME|MEE|MEEB|MEEBR|MEER|MER|MFY|MGHI|MH|MHI|MHY|ML|MLG|MLGR|MLR|MP|MR|MS|MSCH|MSD|MSDB|MSDBR|MSDR|MSE|MSEB|MSEBR|MSER|MSFI|MSG|MSGF|MSGFI|MSGFR|MSGR|MSR|MSTA|MSY|MVC|MVCDK|MVCIN|MVCK|MVCL|MVCLE|MVCLU|MVCOS|MVCP|MVCS|MVCSK|MVGHI|MVHHI|MVHI|MVI|MVIY|MVN|MVO|MVPG|MVST|MVZ|MXBR|MXD|MXDB|MXDBR|MXDR|MXR|MXTR|MY|MYH|MYHR|MYL|MYLR|MYR|N|NC|NG|NGR|NI|NIHF|NIHH|NIHL|NILF|NILH|NILL|NIY|NR|NY|O|OC|OG|OGR|OI|OIHF|OIHH|OIHL|OILF|OILH|OILL|OIY|OR|OY|PACK|PALB|PC|PFD|PFDRL|PFMF|PFPO|PGIN|PGOUT|PKA|PKU|PLO|PR|PT|PTF|PTFF|PTI|PTLB|QADTR|QAXTR|RCHP|RISBG|RLL|RLLG|RNSBG|ROSBG|RP|RRBE|RRDTR|RRXTR|RSCH|RXSBG|S|SAC|SACF|SAL|SAM24|SAM31|SAM64|SAR|SCHM|SCK|SCKC|SCKPF|SD|SDB|SDBR|SDR|SDTR|SE|SEB|SEBR|SER|SFASR|SFPC|SG|SGF|SGFR|SGR|SH|SHY|SIE|SIGP|SL|SLA|SLAG|SLB|SLBG|SLBGR|SLBR|SLDA|SLDL|SLDT|SLFI|SLG|SLGF|SLGFI|SLGFR|SLGR|SLL|SLLG|SLR|SLXT|SLY|SP|SPKA|SPM|SPT|SPX|SQD|SQDB|SQDBR|SQDR|SQE|SQEB|SQEBR|SQER|SQXBR|SQXR|SR|SRA|SRAG|SRDA|SRDL|SRDT|SRL|SRLG|SRNM|SRNMT|SRP|SRST|SRSTU|SRXT|SSAIR|SSAR|SSCH|SSKE|SSM|ST|STAM|STAMY|STAP|STC|STCK|STCKC|STCKE|STCKF|STCM|STCMH|STCMY|STCPS|STCRW|STCTG|STCTL|STCY|STD|STDY|STE|STEY|STFL|STFLE|STFPC|STG|STGRL|STH|STHRL|STHY|STIDP|STM|STMG|STMH|STMY|STNSM|STOSM|STPQ|STPT|STPX|STRAG|STRL|STRV|STRVG|STRVH|STSCH|STSI|STURA|STURG|STY|SU|SUR|SVC|SW|SWR|SXBR|SXR|SXTR|SY|TAM|TAR|TB|TBDR|TBEDR|TCDB|TCEB|TCXB|TDCDT|TDCET|TDCXT|TDGDT|TDGET|TDGXT|THDER|THDR|TM|TMH|TMHH|TMHL|TML|TMLH|TMLL|TMY|TP|TPI|TPROT|TR|TRACE|TRACG|TRAP2|TRAP4|TRE|TROO|TROT|TRT|TRTE|TRTO|TRTR|TRTRE|TRTT|TS|TSCH|UNPK|UNPKA|UNPKU|UPT|X|XC|XG|XGR|XI|XIHF|XILF|XIY|XR|XSCH|XY|ZAP)\\b(\\s*)\\b([^\\s\']*)(\'[-0-9A-Z]*\'|)([^\\s\\-\\+\\,\\)]*)([^\\s\']*)(\'[-0-9A-Z]*\'|)([^\\s\\-\\+\\,\\)]*)([^\\s]*)([^@\\n]*)'
+              'captures':
+                  '0':
+                      'name': 'constant.character.zasm'
+                  '1':
+                      'name': 'keyword.control.zasm'
+                  '2':
+                      'name': 'keyword.control.zasm'
+                  '3':
+                      'name': 'entity.name.function.zasm'
+                  '4':
+                      'name': 'entity.name.function.zasm'
+                  '5':
+                      'name': 'string.quoted.single.zasm'
+                  '6':
+                      'name': 'string.quoted.single.zasm'
+                  '7':
+                      'name': 'entity.name.function.zasm'
+                  '8':
+                      'name': 'entity.name.function.zasm'
+                  '9':
+                      'name': 'string.quoted.single.zasm'
+                  '10':
+                      'name': 'entity.name.function.zasm'
+                  '11':
+                      'name': 'comment.line.zasm'
+                  '12':
+                      'name': 'comment.line.zasm'
+                  '13':
+                      'name': 'comment.line.zasm'
+              'name': 'keyword.control.zasm'
+            },
+            {
+              'match': '[0-9]'
+              'name': 'constant.numeric.zvmasm'
+            }
+        ]
+        'end': '((?i)MEND)'
+        'endCaptures':
+            '0':
+                'name': 'meta.entity.name.zvmasm'
+    }
     'declare-rule': {
       # vs original, made DC/DS case-insensitive which pushed capture group numbers up 1
-      # TODO Figure out why uncontinued-statement-rule overrides this, no matter which comes first in patterns[]
-      'match': '\\b((?i)D[C|S])[\\s]*([0-9]*|\\(.*\\))([A-Z][DUBH]?)(L?[0-9]*)(\'.*\'|\\s)([^\\s]*)([^@\\n]*)([^@0-9]{2})'
+      'match': '\\b((?i)D[C|S])[\\s]*([0-9]*|\\(.*\\))([A-Z0-9][DUBH]?)(L?[0-9]*)(\'.*\'|\\s)([^\\s]*)([^@\\n]*)'
       'captures':
           '1':
               'name': 'storage.type.zvmasm'
           '2':
-              'name': 'storage.type.zvmasm'
+              'name': 'variable.other.zvmasm'
           '3':
-              'name': 'storage.type.zvmasm'
+              'name': 'variable.other.zvmasm'
           '4':
-              'name': 'comment.line.zvmasm'
+              'name': 'variable.other.zvmasm'
           '5':
               'name': 'string.quoted.single.zvmasm'
           '6':
-              'name': 'comment.line.zvmasm'
+              'name': 'variable.parameter.zvmasm'
           '7':
               'name': 'comment.line.zvmasm'
-          '8':
-              'name': 'entity.name.tag.zvmasm'
-
-      'name': 'keyword.operator.zvmasm'
+      # 'name': 'keyword.operator.zvmasm'
     },
+    'parenthesis-rule': {
+        'begin': '\\('
+        'beginCaptures':
+            '0':
+                'name': 'character.parenthesis.zvmasm'
+        'end': '\\)'
+        'endCaptures':
+            '0':
+                'name': 'character.parenthesis.zvmasm'
+        'patterns': [
+            { include = "$self" },
+            {
+              # Relational operators
+              'match': '\\s+(EQ|NE|GT|GE|LT|LE)\\s+'
+              'name': 'keyword.operator.zvmasm'
+            },
 
+        ]
+    }
 }
 
 
