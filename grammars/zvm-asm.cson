@@ -30,6 +30,7 @@
     { 'include': '#register-variable-rule' },
     { 'include': '#single-quoted-string-rule' },
     { 'include': '#parenthesis-rule' },
+    { 'include': '#sidcode-rule' },
     {
       'match': '(?i)(AIF|AGO|ANOP|AOD|LCLA|LCLB|LCLC|GBLA|GBLB|GBLC|SET[A|B|C]?|LM|CNOP)'
       'name': 'keyword.control.zvmasm'
@@ -192,6 +193,10 @@
             },
 
         ]
+    },
+    'sidcode-rule': {
+      'match': '@[a-zA-z0-9]{7}'
+      'name': 'sidcode.zvmasm'
     }
 }
 
