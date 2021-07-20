@@ -157,7 +157,7 @@
     }
     'declare-rule': {
       # vs original, made DC/DS case-insensitive which pushed capture group numbers up 1
-      'match': '\\b((?i)D[C|S])[\\s]*([0-9]*|\\(.*\\))([A-Z0-9][DUBH]?)(L?[0-9]*)(\'.*\'|\\s)([^\\s]*)([^@\\n]*)'
+      'match': '\\b((?i)D[C|S])\\s*([0-9]*|\\(.*\\))([a-zA-Z0-9][DUBH]?)(L?[0-9]*)(\'.*\'|\\s)([^\\s]*)([^@\\n]*)'
       'captures':
           '1':
               'name': 'storage.type.zvmasm'
