@@ -23,6 +23,7 @@
 'patterns': [
     { 'include': '#line-too-long-rule' },
     { 'include': '#uncontinued-comment-rule' },
+    { 'include': '#continue-col-rule' },
     { 'include': '#macro-rule' },
     { 'include': '#register-equate-rule' },
     { 'include': '#sequence-number-rule' },
@@ -141,6 +142,27 @@
       # Handles normal comments and macro comments, which are permitted in open code
       'match': '^[.]?[*].*'
       'name': 'comment.line.zvmasm'
+    },
+    'continue-col-rule': {
+      'begin': '(^.{71}\\S)'
+      'beginCaptures':
+          '0':
+              'name': 'comment.line.zvmasm'
+      # TODO: This end capture could be cleaner, must have space at col 72 or it keeps matching
+      'end': '(^.{71}\\s)'
+      'endCaptures':
+          '0':
+              'name': 'comment.line.zvmasm'
+      'contentName': 'comment.line.zvmasm'
+      'patterns': [
+            { 'include': '#register-equate-rule' },
+            { 'include': '#parenthesis-rule' },
+            {
+              # Start at Col 16 for next line
+              'match': '(^.{15}(?<!\\s))'
+              'name': 'invalid.illegal.zvmasm'
+            }
+        ]
     },
     'macro-rule': {
         'begin': '((?i)MACRO)'
