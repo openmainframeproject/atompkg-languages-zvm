@@ -148,8 +148,8 @@
       'beginCaptures':
           '0':
               'name': 'comment.line.zvmasm'
-      # TODO: This end capture could be cleaner, the lookahead is atomic so the group is not captured to highlight when a space is not in col 72
-      'end': '(^.{71}\\s)|(?=^(\\S|\\s){1,71}\\n)'
+      # TODO: This end capture could be cleaner. Looks like the end capture isn't following any patterns
+      'end': '(^.{71}\\s)|(^(\\S|\\s){1,71}\\n)'
       'endCaptures':
           '0':
               'name': 'comment.line.zvmasm'
