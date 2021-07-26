@@ -15,7 +15,7 @@
   "activationHooks": [
     "language-zvm-asm:grammar-used"
   ],
-  "repository": "https://github.com/openmainframeproject/atompkg-language-zvm-asm",
+  "repository": "https://github.com/openmainframeproject/atompkg-languages-zvm",
   "license": "Apache 2",
   "comment": "See NOTICE.md for copyright notices",
   "engines": {
