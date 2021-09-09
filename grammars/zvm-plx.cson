@@ -17,8 +17,8 @@
 # - If a line matches line-too-long, it does NOT match others like uncontinued-statement (provable using editor:log-cursor-scope)
 
 'scopeName': 'source.zvmplx'
-'name': 'z/VM PL/X'
-'fileTypes': ['PLX','PLXCOPY', 'PLXMACRO']
+'name': 'PL/I'
+'fileTypes': ['PLX','PLXCOPY', 'PLXMACRO',PL1,PLI]
 
 'patterns': [
     { 'include': '#line-too-long-rule' },
