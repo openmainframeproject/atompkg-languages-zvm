@@ -18,7 +18,7 @@
 
 'scopeName': 'source.zvmplx'
 'name': 'PL/I'
-'fileTypes': ['PLX','PLXCOPY', 'PLXMACRO',PL1,PLI]
+'fileTypes': ['PLX','PLXCOPY', 'PLXMACRO','PL1','PLI']
 
 'patterns': [
     { 'include': '#line-too-long-rule' },
