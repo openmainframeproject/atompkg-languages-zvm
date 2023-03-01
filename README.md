@@ -1,3 +1,5 @@
+**NOTICE: This project is in [Emeritus status](https://tac.openmainframeproject.org/process/lifecycle.html#emeritus-stage) and no longer maintained**
+
 # language-zvm-asm package
 
 Atom editor package that adds language syntax highlighting for z/VM assembler language files as well as the PL/X grammar.
